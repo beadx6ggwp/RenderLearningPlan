@@ -110,7 +110,7 @@ MSVC STL source code:https://github.com/microsoft/STL
 
 12/02 clipping
 
-![img](https://github.com/beadx6ggwp/RenderLearningPlan/blob/master/RenderResult/07.6 3dEngine3_clipping/07.6 3dEngine3_clipping.gif)
+![img](https://i.imgur.com/Lz1CRkL.gif)
 
 12/25 Z-buffer & basic texture
 
