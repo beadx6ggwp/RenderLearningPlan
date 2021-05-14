@@ -110,11 +110,11 @@ MSVC STL source code:https://github.com/microsoft/STL
 
 12/02 clipping
 
-![img](https://github.com/beadcaptain/RenderLearningPlan/blob/master/RenderResult/07.6%203dEngine3_clipping/07.6%203dEngine3_clipping.gif)
+![img](RenderResult/07.6_3dEngine3_clipping/clipping.gif)
 
 12/25 Z-buffer & basic texture
 
-![img](https://github.com/beadcaptain/RenderLearningPlan/blob/master/RenderResult/z-buffer%20%26%20basic%20texture/messageImage_1608802188667.jpg)
+![img](RenderResult/z-buffer&basic_texture/messageImage_1608795427388.jpg)
 
 1/21 texture
 
