@@ -155,6 +155,7 @@ C++用VisualStudio2019、VScode+GCC+CM
 
 有些內容過時了，可能要慢慢研究替待方法
 
+Practical Rendering and Computation with Direct3D 11
 
 PDF電子書 [Google Drive](https://drive.google.com/drive/folders/1YCooGN86mw_TNKmTB8LpJHbhuswdmCQk?usp=sharing)
 
