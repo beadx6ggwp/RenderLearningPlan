@@ -120,7 +120,7 @@ MSVC STL source code:https://github.com/microsoft/STL
 
 ![img](https://i.imgur.com/rH5VPAY.png)
 
-4/08
+4/08 改用tinyrenderer
 
 ![img](https://i.imgur.com/Xc6QkqS.png)
 
