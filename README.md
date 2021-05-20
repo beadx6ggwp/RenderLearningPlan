@@ -11,6 +11,8 @@ GAMES101: 现代计算机图形学入门-闫令琪:屬於理論課程，從投�
 [重點整理](https://zhuanlan.zhihu.com/c_1249465121615204352)
 [Final](http://games-cn.org/wp-content/uploads/2020/04/Final_Project.pdf)
 
+[GAMES202](https://sites.cs.ucsb.edu/~lingqi/teaching/games202.html): 高质量实时渲染Real-Time High Quality Rendering
+
 [CS 148 Introduction to Computer Graphics and Imaging](https://web.stanford.edu/class/cs148/lectures.html)
 
 [Computer Graphics (ECS175)](https://www.youtube.com/playlist?list=PL_w_qWAQZtAZhtzPI5pkAtcUVgmzdAP8g)
