@@ -11,6 +11,10 @@ GAMES101: 现代计算机图形学入门-闫令琪:屬於理論課程，從投�
 [重點整理](https://zhuanlan.zhihu.com/c_1249465121615204352)
 [Final](http://games-cn.org/wp-content/uploads/2020/04/Final_Project.pdf)
 
+[GAMES202](https://sites.cs.ucsb.edu/~lingqi/teaching/games202.html): 高质量实时渲染Real-Time High Quality Rendering
+
+[CS 148 Introduction to Computer Graphics and Imaging](https://web.stanford.edu/class/cs148/lectures.html)
+
 [Computer Graphics (ECS175)](https://www.youtube.com/playlist?list=PL_w_qWAQZtAZhtzPI5pkAtcUVgmzdAP8g)
 
 [MIT 6.837 Computer Graphics (Fall 2003)](https://ocw.mit.edu/courses/electrical-engineering-and-computer-science/6-837-computer-graphics-fall-2012/lecture-notes/)
@@ -153,6 +157,7 @@ C++用VisualStudio2019、VScode+GCC+CM
 
 有些內容過時了，可能要慢慢研究替待方法
 
+Practical Rendering and Computation with Direct3D 11
 
 PDF電子書 [Google Drive](https://drive.google.com/drive/folders/1YCooGN86mw_TNKmTB8LpJHbhuswdmCQk?usp=sharing)
 
