@@ -143,12 +143,14 @@
     <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Model.cpp" />
+    <ClCompile Include="my_gl.cpp" />
     <ClCompile Include="tgaimage.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Device.h" />
     <ClInclude Include="Geometry.h" />
     <ClInclude Include="Model.h" />
+    <ClInclude Include="my_gl.h" />
     <ClInclude Include="Screen.h" />
     <ClInclude Include="tgaimage.h" />
     <ClInclude Include="Tool.h" />

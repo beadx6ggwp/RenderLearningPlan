@@ -34,6 +34,9 @@
     <ClCompile Include="tgaimage.cpp">
       <Filter>Source Files\Tool</Filter>
     </ClCompile>
+    <ClCompile Include="my_gl.cpp">
+      <Filter>Source Files\RenderDevice</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Device.h">
@@ -53,6 +56,9 @@
     </ClInclude>
     <ClInclude Include="tgaimage.h">
       <Filter>Source Files\Tool</Filter>
+    </ClInclude>
+    <ClInclude Include="my_gl.h">
+      <Filter>Source Files\RenderDevice</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

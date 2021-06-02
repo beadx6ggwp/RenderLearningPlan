@@ -9,6 +9,7 @@
 #include "screen.h"
 #include "device.h"
 #include "model.h"
+#include "my_gl.h"
 
 using namespace std;
 //-----------------------------------------
@@ -20,26 +21,18 @@ void render();
 const int width = 800, height = 800, depth = 255;
 Device device;
 
-Model* model;
-
 UI32 texture[256][256];
 void filltriangle_bery_texture(Vec3f* pts, Vec3f* vt);
 void triangle_tga_texture(Vec3i t0, Vec3i t1, Vec3i t2, Vec2i uv0, Vec2i uv1, Vec2i uv2, float intensity);
 void triangle_tga_normal(Vec3i t0, Vec3i t1, Vec3i t2, float ity0, float ity1, float ity2);
 //--------------------------------------------------------
 
-int* zbuffer = NULL;
-
-Vec3f light_dir(0, 1, 1);// left hand(1,-1,1)
-Vec3f eye(0, 0, 3);
-Vec3f center(0, 0, 0);
 float fTheta = 0;
-
+bool isRot = 1;
 
 Vec3f m2v(Matrix m) {
 	return Vec3f(m[0][0] / m[3][0], m[1][0] / m[3][0], m[2][0] / m[3][0]);
 }
-
 Matrix v2m(Vec3f v) {
 	mat<4, 4, float> m;
 	m[0][0] = v.x;
@@ -48,32 +41,6 @@ Matrix v2m(Vec3f v) {
 	m[3][0] = 1.f;
 	return m;
 }
-
-Matrix viewport(int x, int y, int w, int h) {
-	Matrix m = Matrix::identity();
-	m[0][3] = x + w / 2.f;
-	m[1][3] = y + h / 2.f;
-	m[2][3] = depth / 2.f;
-
-	m[0][0] = w / 2.f;
-	m[1][1] = -h / 2.f;
-	m[2][2] = depth / 2.f;
-	return m;
-}
-Matrix lookat(Vec3f eye, Vec3f center, Vec3f up) {
-	Vec3f z = (eye - center).normalize();
-	Vec3f x = cross(up, z).normalize();
-	Vec3f y = cross(z, x).normalize();
-	Matrix res = Matrix::identity();
-	for (int i = 0; i < 3; i++) {
-		res[0][i] = x[i];
-		res[1][i] = y[i];
-		res[2][i] = z[i];
-		res[i][3] = -center[i];
-	}
-	return res;
-}
-
 Matrix RotationX(float fAngleRad) {
 	Matrix res = Matrix::identity();
 	/*
@@ -116,7 +83,6 @@ Matrix RotationZ(float fAngleRad) {
 	res[1][1] = cosf(fAngleRad);
 	return res;
 }
-
 Matrix RotationByAxis(float x, float y, float z, float theta) {
 	Matrix res = Matrix::identity();
 	/*
@@ -144,11 +110,73 @@ Matrix RotationByAxis(float x, float y, float z, float theta) {
 	res[3][0] = res[3][1] = res[3][2] = 0;
 	return res;
 }
+//-----------------------------------------------------------
+
+Model* model = NULL;
+
+Vec3f light_dir(1, 1, 1);// left hand(1,-1,1)
+Vec3f       eye(1, 1, 3);
+Vec3f    center(0, 0, 0);
+Vec3f        up(0, 1, 0);
+
+
+struct GouraudShader : public IShader {
+	Vec3f varying_intensity; // written by vertex shader, read by fragment shader
+
+	virtual Vec4f vertex(int iface, int nthvert) {
+		varying_intensity[nthvert] = (std::max)(0.f, model->normal(iface, nthvert) * light_dir); // get diffuse lighting intensity
+		Vec4f gl_Vertex = embed<4>(model->vert(iface, nthvert)); // read the vertex from .obj file
+		return Viewport * Projection * ModelView * gl_Vertex; // transform it to screen coordinates
+	}
+
+	virtual bool fragment(Vec3f bar, UI32& color) {
+		float intensity = varying_intensity * bar;   // interpolate intensity for the current pixel
+		float r, g, b;
+		r = 255 * intensity;
+		g = 255 * intensity;
+		b = 255 * intensity;
+		color = rgb2hex(r, g, b);					// well duh
+		return false;                              // no, we do not discard this pixel
+	}
+};
+
+struct GouraudShader2 : public IShader {
+	Vec3f varying_intensity;
+	float scale = 1;
+
+	virtual Vec4f vertex(int iface, int nthvert) {
+		Vec4f gl_Vertex = embed<4>(model->vert(iface, nthvert)* scale);
+		gl_Vertex = Viewport * Projection * ModelView * gl_Vertex;
+		varying_intensity[nthvert] = (std::max)(0.f, model->normal(iface, nthvert) * light_dir);
+		return gl_Vertex;
+	}
+
+	virtual bool fragment(Vec3f bar, UI32& color) {
+		float intensity = varying_intensity * bar;
+		float r,g,b;
+		
+		// color intensities [1, .85, .60, .45, .30, .15, 0]
+		if (intensity > .85) intensity = 1;
+		else if (intensity > .60) intensity = .80;
+		else if (intensity > .45) intensity = .60;
+		else if (intensity > .30) intensity = .45;
+		else if (intensity > .15) intensity = .30;
+		else intensity = 0;
+
+		// orange
+		r = 255 * intensity;
+		g = 125 * intensity;
+		b = 0 * intensity;
+		color = rgb2hex(r, g, b);
+		return false;
+	}
+};
+
 //--------------------------------------------------------
+void testCase();
 
 string dirPath = "../_objfile/testTexture/";
-string objName = "wall1.obj";
-float scale = 0.2;
+string objName = "african_head.obj";
 /*
 african_head
 rock
@@ -156,6 +184,7 @@ floor
 diablo3_pose
 wall1
 capsule
+dice
 */
 
 int main(void) {
@@ -183,29 +212,6 @@ int main(void) {
 
 void onLoad() {
 	model = new Model(dirPath + objName);
-	/*Vec4f A = embed<4>(Vec3f(1, 2, 3));
-	mat<4, 1, float> m1;
-	m1[0][0] = 2;
-	m1[1][0] = 3;
-	m1[2][0] = 4;
-	m1[3][0] = 1.f;
-	Matrix m2 = Matrix::identity();
-	Matrix m3 = Matrix::identity();*/
-
-	//A = m2 * m3 * A;	
-
-	/*mat<2, 2, float> m1;
-	m1.set_col(0,Vec2f(3, 1));
-	m1.set_col(1, Vec2f(1, 2));
-	Vec2f v1(-1, 2);
-	Vec2f v2 = m1 * v1;*/
-	int i, j;
-	for (j = 0; j < 256; j++) {
-		for (i = 0; i < 256; i++) {
-			int x = i / 32, y = j / 32;
-			texture[j][i] = ((x + y) & 1) ? 0xffffff : 0x3fbcef;
-		}
-	}
 }
 void gameMain() {
 	fpsCounting();
@@ -219,13 +225,35 @@ void gameMain() {
 
 void update(float deltatime) {
 	//cout << deltatime << "\n";
-
-	fTheta += 0.5f * deltatime;
+	if (isRot)
+		fTheta += 0.5f * deltatime;
 }
 
 void render() {
 	device.clear();
 
+	// ------
+	testCase();
+	// ------
+	Matrix ModelTrans = RotationByAxis(1, 1, 1, fTheta);
+
+	lookat(eye, center, up);
+	viewport(width / 8, height / 8, width * 3 / 4, height * 3 / 4);
+	projection(-1.f / (eye - center).norm());
+	light_dir.normalize();
+
+	GouraudShader2 shader;
+
+	for (int i = 0; i < model->nfaces(); i++) {
+		Vec4f screen_coords[3];
+		for (int j = 0; j < 3; j++) {
+			screen_coords[j] = shader.vertex(i, j);
+		}
+		triangle(screen_coords, shader, device);
+	}
+}
+
+void testCase() {
 	//device.drawLine(0, 300, 200, 400, 0xff0000);
 	Vec3f triTest[] = { Vec3f(0,0,0), Vec3f(80,0,0), Vec3f(0,40,0) };
 	device.filltriangle_bery(triTest, 0xff7700);
@@ -264,52 +292,6 @@ void render() {
 	Vec3f vt2[] = { Vec3f(1, 0, 0), Vec3f(1, 1, 0), Vec3f(0, 1, 0) };
 	Vec3f triT2[] = { Vec3f(p1.x + size.x,p1.y,0), Vec3f(p1.x + size.x,p1.y + size.y,0), Vec3f(p1.x,p1.y + size.y,0) };
 	filltriangle_bery_texture(triT2, vt2);
-
-	// ------
-	//Matrix ModelTrans = RotationY(fTheta);
-
-	//                                 x, y, z, angle
-	//Matrix ModelTrans = RotationByAxis(1, 0, 0, fTheta);
-	//Matrix ModelTrans = RotationByAxis(0, 1, 0, fTheta);
-	//Matrix ModelTrans = RotationByAxis(0, 0, 1, fTheta);
-	Matrix ModelTrans = RotationByAxis(1, 1, 0, fTheta);
-
-	Matrix ViewCamera = lookat(eye, center, Vec3f(0, 1, 0));
-	Matrix Projection = Matrix::identity();
-	Matrix ViewPort = viewport(width / 8, height / 8, width * 3 / 4, height * 3 / 4);
-	Projection[3][2] = -1.f / (eye - center).norm();
-
-
-	for (int i = 0; i < model->nfaces(); i++) {
-		std::vector<int> face = model->face(i);
-		Vec3i screen_coords[3] = {};
-		Vec3f world_coords[3] = {};
-		float intensity[3] = {};
-		for (int j = 0; j < 3; j++) {
-			Vec3f v = model->vert(face[j]);
-
-			// world_coords沒有正確被轉換，還是原本模型的座標
-			//Vec4f scp = ViewPort * Projection * ViewCamera * ModelTrans * embed<4>((v * scale));
-			//screen_coords[j] = Vec3f(scp[0] / scp[3], scp[1] / scp[3], scp[2] / scp[3]);
-			//world_coords[j] = v;
-
-			Vec4f mvp = Projection * ViewCamera * ModelTrans * embed<4>((v * scale));
-			Vec4f scp = ViewPort * mvp;
-			screen_coords[j] = Vec3i(scp[0] / scp[3], scp[1] / scp[3], scp[2] / scp[3]);
-			world_coords[j] = Vec3f(mvp[0], mvp[1], mvp[2]);
-
-			// relative light: if light on face, then always be light
-			//intensity[j] = model->norm(i, j) * light_dir;
-
-			// fixed light: static light source  
-			Vec4f rotNormal = ModelTrans * embed<4>(model->norm(i, j));
-			intensity[j] = Vec3f(rotNormal[0] / rotNormal[3], rotNormal[1] / rotNormal[3], rotNormal[2] / rotNormal[3]) * light_dir;
-
-		}
-		triangle_tga_normal(screen_coords[0], screen_coords[1], screen_coords[2], intensity[0], intensity[1], intensity[2]);
-		//device.drawTriangle(screen_coords[0], screen_coords[1], screen_coords[2], 0xffff00);
-
-	}
 }
 
 

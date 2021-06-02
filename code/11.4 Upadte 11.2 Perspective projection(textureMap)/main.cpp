@@ -25,15 +25,15 @@ Model* model;
 UI32 texture[256][256];
 void filltriangle_bery_texture(Vec3f* pts, Vec3f* vt);
 void triangle_tga_texture(Vec3i t0, Vec3i t1, Vec3i t2, Vec2i uv0, Vec2i uv1, Vec2i uv2, float intensity);
-void triangle_tga_normal(Vec3i t0, Vec3i t1, Vec3i t2, float ity0, float ity1, float ity2);
 //--------------------------------------------------------
 
 int* zbuffer = NULL;
 
-Vec3f light_dir(1, -1, 1);
+Vec3f light_dir(0, 0, -1);
 Vec3f eye(1, 1, 3);
 Vec3f center(0, 0, 0);
 float fTheta = 0;
+bool isRot = 1;
 
 
 Vec3f m2v(Matrix m) {
@@ -60,6 +60,7 @@ Matrix viewport(int x, int y, int w, int h) {
 	m[2][2] = depth / 2.f;
 	return m;
 }
+
 Matrix lookat(Vec3f eye, Vec3f center, Vec3f up) {
 	Vec3f z = (eye - center).normalize();
 	Vec3f x = cross(up, z).normalize();
@@ -119,8 +120,8 @@ Matrix RotationZ(float fAngleRad) {
 //--------------------------------------------------------
 
 string dirPath = "../_objfile/testTexture/";
-string objName = "diablo3_pose.obj";
-float scale = 0.5;
+string objName = "dice.obj";
+float scale = 0.2;
 /*
 african_head
 rock
@@ -128,6 +129,7 @@ floor
 diablo3_pose
 wall1
 capsule
+dice
 */
 
 int main(void) {
@@ -186,8 +188,8 @@ void gameMain() {
 
 void update(float deltatime) {
 	//cout << deltatime << "\n";
-
-	fTheta += 0.5f * deltatime;
+	if (isRot)
+		fTheta += 0.7f * deltatime;
 }
 
 void render() {
@@ -233,43 +235,40 @@ void render() {
 	filltriangle_bery_texture(triT2, vt2);
 
 	// ------
+
 	Matrix ModelTrans = RotationY(fTheta);
 	Matrix ViewCamera = lookat(eye, center, Vec3f(0, 1, 0));
 	Matrix Projection = Matrix::identity();
 	Matrix ViewPort = viewport(width / 8, height / 8, width * 3 / 4, height * 3 / 4);
 	Projection[3][2] = -1.f / (eye - center).norm();
 
-
 	for (int i = 0; i < model->nfaces(); i++) {
 		std::vector<int> face = model->face(i);
-		Vec3i screen_coords[3] = {};
-		Vec3f world_coords[3] = {};
-		float intensity[3] = {};
+		Vec3i screen_coords[3];
+		Vec3f world_coords[3];
 		for (int j = 0; j < 3; j++) {
 			Vec3f v = model->vert(face[j]);
 
 			//Vec4f scp = ViewPort * Projection * ViewCamera * ModelTrans * embed<4>((v * scale));
+			//world_coords[j] = v; // bug 因為world_coords是原模型座標，會導致後續光源判斷錯誤
 			Vec4f mvp = Projection * ViewCamera * ModelTrans * embed<4>((v * scale));
 			Vec4f scp = ViewPort * mvp;
-
-			// bug
-			//screen_coords[j] = Vec3f(scp[0] / scp[3], scp[1] / scp[3], scp[2] / scp[3]);
-			//world_coords[j] = v;
-
 			screen_coords[j] = Vec3i(scp[0] / scp[3], scp[1] / scp[3], scp[2] / scp[3]);
 			world_coords[j] = Vec3f(mvp[0], mvp[1], mvp[2]);
-
-			// relative light: if light on face, then always be light
-			intensity[j] = model->norm(i, j) * light_dir;
-
-			// fixed light: static light source  
-			//Vec4f rotNormal = ModelTrans * embed<4>(model->norm(i, j));
-			//intensity[j] = Vec3f(rotNormal[0] / rotNormal[3], rotNormal[1] / rotNormal[3], rotNormal[2] / rotNormal[3]) * light_dir;
-			
 		}
-		triangle_tga_normal(screen_coords[0], screen_coords[1], screen_coords[2], intensity[0], intensity[1], intensity[2]);
-		//device.drawTriangle(screen_coords[0], screen_coords[1], screen_coords[2], 0xffffff);
-
+		// get tri n_vec
+		// 這裡的光線與模型始終保持相對位置，所以會有半邊是看不到
+		Vec3f n = cross(world_coords[2] - world_coords[0], world_coords[1] - world_coords[0]);
+		n.normalize();
+		float intensity = n * light_dir;
+		if (intensity > 0) {
+			Vec2i uv[3];
+			for (int k = 0; k < 3; k++) {
+				uv[k] = model->uv(i, k);
+			}
+			triangle_tga_texture(screen_coords[0], screen_coords[1], screen_coords[2], uv[0], uv[1], uv[2], intensity);
+			//device.drawTriangle(screen_coords[0], screen_coords[1], screen_coords[2], 0xffffff);
+		}
 	}
 }
 
@@ -313,44 +312,7 @@ void filltriangle_bery_texture(Vec3f* pts, Vec3f* vt) {
 
 }
 
-// Gouraud shading
-void triangle_tga_normal(Vec3i t0, Vec3i t1, Vec3i t2, float ity0, float ity1, float ity2) {
-	if (t0.y == t1.y && t0.y == t2.y) return; // i dont care about degenerate triangles
-	if (t0.y > t1.y) { std::swap(t0, t1); std::swap(ity0, ity1); }
-	if (t0.y > t2.y) { std::swap(t0, t2); std::swap(ity0, ity2); }
-	if (t1.y > t2.y) { std::swap(t1, t2); std::swap(ity1, ity2); }
 
-	int total_height = t2.y - t0.y;
-	for (int i = 0; i < total_height; i++) {
-		bool second_half = i > t1.y - t0.y || t1.y == t0.y;
-		int segment_height = second_half ? t2.y - t1.y : t1.y - t0.y;
-		float alpha = (float)i / total_height;
-		float beta = (float)(i - (second_half ? t1.y - t0.y : 0)) / segment_height; // be careful: with above conditions no division by zero here
-
-		Vec3i A = t0 + Vec3i(Vec3f(t2 - t0) * alpha);
-		Vec3i B = second_half ? t1 + Vec3i(Vec3f(t2 - t1) * beta) : t0 + Vec3i(Vec3f(t1 - t0) * beta);
-
-		float ityA = ity0 + (ity2 - ity0) * alpha;
-		float ityB = second_half ? ity1 + (ity2 - ity1) * beta : ity0 + (ity1 - ity0) * beta;
-
-		if (A.x > B.x) { std::swap(A, B); std::swap(ityA, ityB); }
-		for (int j = A.x; j <= B.x; j++) {
-			float phi = B.x == A.x ? 1. : (float)(j - A.x) / (B.x - A.x);
-			Vec3i    P = Vec3f(A) + Vec3f(B - A) * phi;
-			float ityP = ityA + (ityB - ityA) * phi;
-			int idx = P.x + P.y * width;
-
-			if (P.x >= width || P.y >= height || P.x < 0 || P.y < 0) continue;
-			if (P.z > device.zbuffer[(int)P.y][(int)P.x]) {
-				device.zbuffer[(int)P.y][(int)P.x] = P.z;
-
-				TGAColor tc = TGAColor(255, 255, 255) * ityP;
-				UI32 c = rgb2hex(tc.bgra[2], tc.bgra[1], tc.bgra[0]);
-				device.setPixel(P.x, P.y, c);
-			}
-		}
-	}
-}
 void triangle_tga_texture(Vec3i t0, Vec3i t1, Vec3i t2, Vec2i uv0, Vec2i uv1, Vec2i uv2, float intensity) {
 	if (t0.y == t1.y && t0.y == t2.y) return; // i dont care about degenerate triangles
 	if (t0.y > t1.y) { std::swap(t0, t1); std::swap(uv0, uv1); }
@@ -363,14 +325,11 @@ void triangle_tga_texture(Vec3i t0, Vec3i t1, Vec3i t2, Vec2i uv0, Vec2i uv1, Ve
 		int segment_height = second_half ? t2.y - t1.y : t1.y - t0.y;
 		float alpha = (float)i / total_height;
 		float beta = (float)(i - (second_half ? t1.y - t0.y : 0)) / segment_height; // be careful: with above conditions no division by zero here
-
 		Vec3i A = t0 + Vec3i(Vec3f(t2 - t0) * alpha);
 		Vec3i B = second_half ? t1 + Vec3i(Vec3f(t2 - t1) * beta) : t0 + Vec3i(Vec3f(t1 - t0) * beta);
 		Vec2i uvA = uv0 + (uv2 - uv0) * alpha;
 		Vec2i uvB = second_half ? uv1 + (uv2 - uv1) * beta : uv0 + (uv1 - uv0) * beta;
-
 		if (A.x > B.x) { std::swap(A, B); std::swap(uvA, uvB); }
-
 		for (int j = A.x; j <= B.x; j++) {
 			float phi = B.x == A.x ? 1. : (float)(j - A.x) / (float)(B.x - A.x);
 			Vec3i   P = Vec3f(A) + Vec3f(B - A) * phi;

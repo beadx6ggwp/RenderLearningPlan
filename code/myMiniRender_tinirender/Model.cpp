@@ -35,17 +35,18 @@ Model::Model(const std::string filename) {
 			uv_.push_back(uv);
 		}
 		else if (!line.compare(0, 2, "f ")) {
-			vector<faceData> f_arr;// test1
-			int f, t, n;
+			vector<Vec3i> face;
+			Vec3i tmp;
+			int v, t, n;
 			iss >> trash;
 			int cnt = 0;
 			// 連續頂點0 1 2，所以陣列中每三個index為一個面
 			// facet_vrt_[i*3];
-			while (iss >> f >> trash >> t >> trash >> n) {
-				f_arr.push_back(faceData{ --f,--t,--n });
+			while (iss >> v >> trash >> t >> trash >> n) {
+				face.push_back(Vec3i(--v, --t, --n));
 				cnt++;
 			}
-			faces_.push_back(f_arr);
+			faces_.push_back(face);
 		}
 	}
 	in.close();
@@ -64,21 +65,25 @@ int Model::nfaces() const {
 Vec3f Model::vert(int i) {
 	return verts_[i];
 }
+Vec3f Model::vert(int iface, int nthvert) {
+	return verts_[faces_[iface][nthvert][0]];
+}
 
 std::vector<int> Model::face(int idx) {
 	vector<int> face;
-	for (int i = 0; i < (int)faces_[idx].size(); i++) face.push_back(faces_[idx][i].v);
+	for (int i = 0; i < (int)faces_[idx].size(); i++) 
+		face.push_back(faces_[idx][i].x);//[0]
 	return face;
 }
 
 
 Vec2f Model::uv(int iface, int nvert) {
-	int idx = faces_[iface][nvert].uv;
+	int idx = faces_[iface][nvert].y;//[1]
 	return Vec2f{ uv_[idx].x * diffusemap_.get_width(), uv_[idx].y * diffusemap_.get_height() };
 }
 
-Vec3f Model::norm(int iface, int nvert) {
-	int idx = faces_[iface][nvert].n;
+Vec3f Model::normal(int iface, int nvert) {
+	int idx = faces_[iface][nvert].z;//[2]
 	return norms_[idx].normalize();
 }
 
