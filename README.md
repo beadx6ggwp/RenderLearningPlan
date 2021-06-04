@@ -35,6 +35,14 @@ GAMES101: 现代计算机图形学入门-闫令琪:屬於理論課程，從投�
 
 其他在[Project](https://github.com/beadcaptain/RenderLearningPlan/projects/3)中，快捷鍵"g+b"
 
+Soft Render [理想目標](https://github.com/ZeusYang/TinySoftRenderer):
+- 投影(攝影機、裁切)
+- 貼圖(Mipmap、noraml mapping、雙線性採樣)
+- 光源(環境光、反射)
+- 陰影(硬陰影、軟陰影)
+- 條件著色(Z-buffer、Alpha blending)
+- 反鋸齒(MSAA)
+
 目前大概是打算這樣前進
 
 - [X] win api與windows建立視窗程式的流程與原理
@@ -55,12 +63,11 @@ GAMES101: 现代计算机图形学入门-闫令琪:屬於理論課程，從投�
 - [ ] 投影轉換的1/z,投影產生的非線性問題
 - [X] 合併z-buffer & texture & 投影轉換
 - [X] 圖片讀取 & 貼圖載入
-- [ ] Blender編輯紋理模型與讀取
+- [X] Blender編輯紋理模型與讀取
 - [X] Ground Shading 頂點法向量差值
-- [ ] Phone Shading 像素法向量差值 之後可使用normap mapping
-- [ ] 自製Shader
-- [ ] Cel shading 卡通著色
-- [ ] normap mapping 法向量貼圖
+- [X] normap mapping 法向量貼圖
+- [X] Phone Shading 像素法向量差值 之後可使用normap mapping
+- [X] 簡易Pipeline
 - [ ] Shadow mapping
 - [ ] 複數平面
 - [ ] 四元數旋轉變換
