@@ -104,7 +104,7 @@ MSVC STL source code:https://github.com/microsoft/STL
 
 ## 大致樣貌
 
-10/15:
+2020/10/15:
 
 ![ezgif-4-066520f665a6](https://user-images.githubusercontent.com/21116850/96186551-2c5c5580-0f6e-11eb-899c-3d7ffea7595d.gif)
 
@@ -135,6 +135,8 @@ MSVC STL source code:https://github.com/microsoft/STL
 修正浮點數對齊、重整Vector與Matrix的使用
 ![img](https://i.imgur.com/9mKGEg2.png)
 
+2021/06 
+![](https://i.imgur.com/G2H4F7H.png)
 
 ## 原理
 
