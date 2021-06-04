@@ -142,7 +142,7 @@ MSVC STL source code:https://github.com/microsoft/STL
 修正浮點數對齊、重整Vector與Matrix的使用
 ![img](https://i.imgur.com/9mKGEg2.png)
 
-2021/06 
+2021/06 basic shader & Normal mapping & Render pipeline
 ![](https://i.imgur.com/G2H4F7H.png)
 
 ## 原理
