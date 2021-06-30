@@ -145,29 +145,37 @@ struct GouraudShader2 : public IShader {
 	float scale = 1;
 
 	virtual Vec4f vertex(int iface, int nthvert) {
-		Vec4f gl_Vertex = embed<4>(model->vert(iface, nthvert)* scale);
+		// 取得三角形頂點
+		Vec4f gl_Vertex = embed<4>(model->vert(iface, nthvert) * scale);
+		// 進行座標轉換->攝影機->透視投影
 		gl_Vertex = Viewport * Projection * ModelView * gl_Vertex;
+		// 計算此三角形與燈光的夾角，決定亮度
 		varying_intensity[nthvert] = (std::max)(0.f, model->normal(iface, nthvert) * light_dir);
 		return gl_Vertex;
 	}
 
 	virtual bool fragment(Vec3f bar, UI32& color) {
+		// 對三個頂點的亮度根據uv插值，決定此點的插植亮度為何
 		float intensity = varying_intensity * bar;
-		float r,g,b;
-		
+		float ins[] = { 1.f, .85f, .60f, .45f, .30f, .15f, 0 };
+		for (int i = 1; i < sizeof(ins) / sizeof(float); i++) {
+			if (intensity > ins[i]) {
+				intensity = ins[i - 1];
+				break;
+			}
+		}
+
 		// color intensities [1, .85, .60, .45, .30, .15, 0]
-		if (intensity > .85) intensity = 1;
+		// 根據亮度給定色階，達到類似卡通渲染的效果
+		/*if (intensity > .85) intensity = 1;
 		else if (intensity > .60) intensity = .80;
 		else if (intensity > .45) intensity = .60;
 		else if (intensity > .30) intensity = .45;
 		else if (intensity > .15) intensity = .30;
-		else intensity = 0;
+		else intensity = 0;*/
 
 		// orange
-		r = 255 * intensity;
-		g = 125 * intensity;
-		b = 0 * intensity;
-		color = rgb2hex(r, g, b);
+		color = rgb2hex(255 * intensity, 125 * intensity, 0 * intensity);
 		return false;
 	}
 };
@@ -243,7 +251,6 @@ void render() {
 	light_dir.normalize();
 
 	GouraudShader2 shader;
-
 	for (int i = 0; i < model->nfaces(); i++) {
 		Vec4f screen_coords[3];
 		for (int j = 0; j < 3; j++) {

@@ -19,4 +19,3 @@ struct IShader {
 };
 
 void triangle(Vec4f* pts, IShader& shader, Device &device);
-void triangle2(Vec4f* pts, IShader& shader, Device& device);

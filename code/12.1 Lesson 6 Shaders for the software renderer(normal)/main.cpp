@@ -117,9 +117,8 @@ void testCase();
 //--------------------------------------------------------
 
 Model* model = NULL;
-Model* model_obj1 = NULL;
-Model* model_obj2 = NULL;
 string dirPath = "../_objfile/testTexture/";
+string objName = "african_head.obj";
 /*
 african_head
 rock
@@ -130,15 +129,11 @@ capsule
 dice
 */
 
-float tx = 0, ty = 0, tz = 0;
-Vec3f light_dir(1, 1, 1);
-Vec3f       eye(0, 0, 0);//1, 1, 3
-Vec3f    center(-1, 0, 0);
-Vec3f        up(0, 1, 0);
 
-Vec3f	 vCamera(0, 0, 0);
-Vec3f   vLookDir(0, 0, 1);
-float fYaw = 0;
+Vec3f light_dir(1, 1, 1);
+Vec3f       eye(1, 1, 3);//1, 1, 3
+Vec3f    center(0, 0, 0);
+Vec3f        up(0, 1, 0);
 
 
 struct GouraudShader : public IShader {
@@ -169,7 +164,7 @@ struct GouraudShader2 : public IShader {
 	mat<2, 3, float> varying_uv;
 	mat<4, 4, float> uniform_M;
 	mat<4, 4, float> uniform_MIT;
-	float scale = 0.3;
+	float scale = 1;
 
 	virtual Vec4f vertex(int iface, int nthvert) {
 		Vec4f gl_Vertex = embed<4>(model->vert(iface, nthvert) * scale);
@@ -204,13 +199,12 @@ struct TextureShader : public IShader {
 	mat<2, 3, float> varying_uv;  // same as above
 	mat<4, 4, float> uniform_M;   //  Projection*ModelView
 	mat<4, 4, float> uniform_MIT; // (Projection*ModelView).invert_transpose()
-	float scale = 0.3;
 
 	virtual Vec4f vertex(int iface, int nthvert) {
 
 		varying_uv.set_col(nthvert, model->uv(iface, nthvert));
 		varying_intensity[nthvert] = (std::max)(0.f, model->normal(iface, nthvert) * light_dir);
-		Vec4f gl_Vertex = embed<4>(model->vert(iface, nthvert) * scale);
+		Vec4f gl_Vertex = embed<4>(model->vert(iface, nthvert));
 		return Viewport * Projection * ModelView * gl_Vertex;
 	}
 
@@ -229,13 +223,12 @@ struct NornmalImgShader : public IShader {
 	mat<2, 3, float> varying_uv;
 	mat<4, 4, float> uniform_M;
 	mat<4, 4, float> uniform_MIT;
-	float scale = 0.3;
 
 	virtual Vec4f vertex(int iface, int nthvert) {
 
 		varying_uv.set_col(nthvert, model->uv(iface, nthvert));
 		varying_intensity[nthvert] = (std::max)(0.f, model->normal(iface, nthvert) * light_dir);
-		Vec4f gl_Vertex = embed<4>(model->vert(iface, nthvert) * scale);
+		Vec4f gl_Vertex = embed<4>(model->vert(iface, nthvert));
 		return Viewport * Projection * ModelView * gl_Vertex;
 	}
 
@@ -253,11 +246,10 @@ struct NormalShader : public IShader {
 	mat<2, 3, float> varying_uv;
 	mat<4, 4, float> uniform_M;
 	mat<4, 4, float> uniform_MIT;
-	float scale = 0.3;
 
 	virtual Vec4f vertex(int iface, int nthvert) {
 		varying_uv.set_col(nthvert, model->uv(iface, nthvert));
-		Vec4f gl_Vertex = embed<4>(model->vert(iface, nthvert) * scale);
+		Vec4f gl_Vertex = embed<4>(model->vert(iface, nthvert));
 		return Viewport * Projection * ModelView * gl_Vertex;
 	}
 
@@ -266,28 +258,13 @@ struct NormalShader : public IShader {
 		Vec3f n = proj<3>(uniform_MIT * embed<4>(model->normal(uv))).normalize();
 		Vec3f l = proj<3>(uniform_M * embed<4>(light_dir)).normalize();
 
-		float intensity = (std::max)(0.1f, n * l);
+		float intensity = (std::max)(0.f, n * l);
 		TGAColor tc = model->diffuse(uv) * intensity;
-		color = rgb2hex(tc[2], tc[1], tc[0]);//bgra
+		color = rgb2hex(tc[2], tc[1], tc[0]); //bgra
 		return false;
 	}
 };
 
-//90.0f, (float)device.height / (float)device.width, 0.1f, 1000.0f
-Matrix makeProjection(float fFovDegrees, float fAspectRatio, float fNear, float fFar)
-{
-	float fFovRad = 1.0f / tanf(fFovDegrees * 0.5f / 180.0f * 3.14159f);
-	Matrix matrix = Matrix::identity();
-	Vec3f c0(fAspectRatio * fFovRad, 0, 0);
-	Vec3f c1(0, fFovRad, 0);
-	Vec3f c2(0, 0, fFar / (fFar - fNear));
-	Vec3f c3(0, 0, (fFar * fNear) / (fFar - fNear));
-	matrix.set_col(0, embed<4>(c0, 0.0f));
-	matrix.set_col(1, embed<4>(c1, 0.0f));
-	matrix.set_col(2, embed<4>(c2, 1.0f));
-	matrix.set_col(3, embed<4>(c3, 0.0f));
-	return matrix;
-}
 
 int main(void) {
 
@@ -313,10 +290,7 @@ int main(void) {
 }
 
 void onLoad() {
-	//model = new Model(dirPath + objName);
-
-	model_obj1 = new Model(dirPath + "floor.obj");
-	model_obj2 = new Model(dirPath + "african_head.obj");
+	model = new Model(dirPath + objName);
 }
 void gameMain() {
 	fpsCounting();
@@ -332,56 +306,6 @@ void update(float deltatime) {
 	//cout << deltatime << "\n";
 	if (isRot)
 		fTheta += 0.5f * deltatime;
-
-	//eye.x = 10 * sin(timeSinceEpochMillisec() * 0.001);
-	//eye.z = 10 * sin(timeSinceEpochMillisec() * 0.001) + 10.5;
-
-	//vCamera.x = 1 * sin(timeSinceEpochMillisec() * 0.001);
-	//vCamera.y = 1 * sin(timeSinceEpochMillisec() * 0.001);
-
-	//fYaw += 0.5f * deltatime;
-
-	int sp = 2;
-	if (screen_keys['R']) {
-		vCamera = Vec3f(0, 0, 0);
-		fYaw = 0;
-	}
-	if (screen_keys[VK_UP]) {
-		vCamera.y += sp * deltatime;
-	}
-	if (screen_keys[VK_DOWN]) {
-		vCamera.y -= sp * deltatime;
-	}
-	if (screen_keys[VK_RIGHT]) {
-		// get vLookDir right normal vec
-		Vec3f vRight(vLookDir.z, 0, -vLookDir.x);
-		Vec3f newMove = vRight * sp * deltatime;
-		vCamera = vCamera + newMove;
-
-	}
-	if (screen_keys[VK_LEFT]) {
-		// get vLookDir left normal vec
-		Vec3f vLeft(-vLookDir.z, 0, vLookDir.x);
-		Vec3f newMove = vLeft * sp * deltatime;
-		vCamera = vCamera + newMove;
-	}
-
-	Vec3f vForward = vLookDir * 5.0 * deltatime;
-
-	if (screen_keys['W']) {
-		vCamera = vCamera - vForward;
-	}
-	if (screen_keys['S']) {
-		vCamera = (vCamera + vForward);
-	}
-	if (screen_keys['A']) {
-		fYaw -= 1.0f * 0.7f * deltatime;
-	}
-	if (screen_keys['D']) {
-		fYaw += 1.0f * 0.7f * deltatime;
-	}
-
-	cout << vCamera << "| " << vLookDir << "| " << fYaw * 180.0f / 3.14f << "\n";
 }
 
 void render() {
@@ -390,42 +314,19 @@ void render() {
 	// ------
 	testCase();
 	// ------
-
-	Vec3f vTarget(0, 0, 1);
-	Matrix matCameraRotY = RotationY(fYaw);
-
-	Vec4f temp = matCameraRotY * embed<4>(vTarget);
-	vLookDir.x = temp[0], vLookDir.y = temp[1], vLookDir.z = temp[2];
-
-	vTarget = vCamera + vLookDir;
-
-	lookat(vTarget, vCamera, up);
-	viewport(width / 8, height / 8, width * 3 / 4, height * 3 / 4);
-	projection(-1.f / (vTarget - vCamera).norm());
-
-	//lookat(eye, center, up);
-	//viewport(width / 8, height / 8, width * 3 / 4, height * 3 / 4);
-	//projection(-1.f / (eye - center).norm());
-	//Projection = makeProjection(90.0f, ((float)height / (float)width)*0.75, 0.1f, 1000.0f);
-	light_dir.normalize();
-
 	Matrix ModelTrans = RotationByAxis(1, 1, 1, fTheta);
 
-	TextureShader shader;
+	lookat(eye, center, up);
+	viewport(width / 8, height / 8, width * 3 / 4, height * 3 / 4);
+	projection(-1.f / (eye - center).norm());
+	light_dir.normalize();
+
+	NormalShader shader;
 
 	// set tran
-	shader.uniform_M = Projection * ModelView;
-	shader.uniform_MIT = (Projection * ModelView).invert_transpose();
+	shader.uniform_M   =  Projection*ModelView;
+    shader.uniform_MIT = (Projection*ModelView).invert_transpose();
 
-	model = model_obj1;
-	for (int i = 0; i < model->nfaces(); i++) {
-		Vec4f screen_coords[3];
-		for (int j = 0; j < 3; j++) {
-			screen_coords[j] = shader.vertex(i, j);
-		}
-		triangle(screen_coords, shader, device);
-	}
-	model = model_obj2;
 	for (int i = 0; i < model->nfaces(); i++) {
 		Vec4f screen_coords[3];
 		for (int j = 0; j < 3; j++) {
