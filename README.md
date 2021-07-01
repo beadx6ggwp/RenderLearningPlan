@@ -96,6 +96,7 @@ MSVC STL source code:https://github.com/microsoft/STL
 - 3D Software Rendering:[Youtube](https://www.youtube.com/playlist?list=PLEETnX-uPtBUbVOok816vTl1K9vV1GgH5)
 - C++ 3D DirectX Programming:[Youtube](https://www.youtube.com/watch?v=_4FArgOX1I4&list=PLqCJpWy5Fohd3S7ICFXwUomYW0Wv67pDD)
 - 软渲染器Soft Renderer:https://yangwc.com/categories/Soft-Renderer/
+- Brian Will:https://www.youtube.com/channel/UCseUQK4kC3x2x543nHtGpzw
 
 參考的Github:
 - SRender : https://github.com/SunXLei/SRender
