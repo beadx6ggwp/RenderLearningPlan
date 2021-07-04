@@ -94,6 +94,7 @@ MSVC STL source code:https://github.com/microsoft/STL
 - WIN32 BASIC:[How to program a game in C++](https://www.youtube.com/playlist?list=PL7Ej6SUky135IAAR3PFCFyiVwanauRqj3)
 - Code-It-Yourself! 3D Graphics Engine: [Youtube](https://www.youtube.com/playlist?list=PLurMPW-GkXTxWNgznMbq41oWEZBgwMItx)
 - 3D Software Rendering:[Youtube](https://www.youtube.com/playlist?list=PLEETnX-uPtBUbVOok816vTl1K9vV1GgH5)
+- 3D Game Engine Development Tutorial:[Youtube](https://www.youtube.com/watch?v=OJt-1qAjY7I&list=PLEETnX-uPtBXP_B2yupUKlflXBznWIlL5&index=61)
 - C++ 3D DirectX Programming:[Youtube](https://www.youtube.com/watch?v=_4FArgOX1I4&list=PLqCJpWy5Fohd3S7ICFXwUomYW0Wv67pDD)
 - 软渲染器Soft Renderer:https://yangwc.com/categories/Soft-Renderer/
 - Brian Will:https://www.youtube.com/channel/UCseUQK4kC3x2x543nHtGpzw
