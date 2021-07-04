@@ -38,24 +38,8 @@ Model::Model(const std::string filename) {
 			vector<Vec3i> face;
 			Vec3i tmp;
 			int v, t, n;
-			int cnt = 0;
 			iss >> trash;
-
-			//--------------
-			// f 1 2 3, 先隨便寫個純頂點的輸入，之後記得整合
-			int cCount = 0;
-			for (int i = 0; i < line.length(); i++) {
-				if (line[i] == '/')cCount++;
-			}
-			if (cCount == 0) {
-				while (iss >> v ) {
-					face.push_back(Vec3i(--v, -1, -1));
-				}
-				faces_.push_back(face);
-				continue;
-			}
-			//------------
-			
+			int cnt = 0;
 			// 連續頂點0 1 2，所以陣列中每三個index為一個面
 			// facet_vrt_[i*3];
 			while (iss >> v >> trash >> t >> trash >> n) {

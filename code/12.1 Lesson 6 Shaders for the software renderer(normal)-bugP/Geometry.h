@@ -229,14 +229,6 @@ typedef mat<4, 4, float> Matrix;
 //-------------------------------------------------------------------------------
 
 Vec3f barycentric(Vec2f A, Vec2f B, Vec2f C, Vec2f P);
-
-Vec3f m2v(Matrix m);
-Matrix v2m(Vec3f v);
-Matrix RotationX(float fAngleRad);
-Matrix RotationY(float fAngleRad);
-Matrix RotationZ(float fAngleRad);
-Matrix RotationByAxis(float x, float y, float z, float theta);
-
 mat4x4 Matrix_MakeIdentity();
 mat4x4 Matrix_MakeRotationX(float fAngleRad);
 mat4x4 Matrix_MakeRotationY(float fAngleRad);

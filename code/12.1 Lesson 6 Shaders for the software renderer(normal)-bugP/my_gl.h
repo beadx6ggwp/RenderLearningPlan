@@ -4,7 +4,6 @@
 #include "geometry.h"
 #include "Device.h"
 
-extern int RENDER_MODE;// 應該要改成enum來表示
 extern Matrix ModelView;
 extern Matrix Viewport;
 extern Matrix Projection;
@@ -15,7 +14,7 @@ void lookat(Vec3f eye, Vec3f center, Vec3f up);
 
 struct IShader {
     virtual ~IShader();
-    virtual Vec4f vertex(int iface, int nthvert) = 0; //iface:第i個片三角形, nthvert:這片三角形第n個頂點
+    virtual Vec4f vertex(int iface, int nthvert) = 0;
     virtual bool fragment(Vec3f bar, UI32 &color) = 0;
 };
 

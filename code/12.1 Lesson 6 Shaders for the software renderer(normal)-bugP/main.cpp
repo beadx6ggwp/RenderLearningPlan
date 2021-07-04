@@ -30,18 +30,95 @@ void triangle_tga_normal(Vec3i t0, Vec3i t1, Vec3i t2, float ity0, float ity1, f
 
 float fTheta = 0;
 bool isRot = 1;
+
+Vec3f m2v(Matrix m) {
+	return Vec3f(m[0][0] / m[3][0], m[1][0] / m[3][0], m[2][0] / m[3][0]);
+}
+Matrix v2m(Vec3f v) {
+	mat<4, 4, float> m;
+	m[0][0] = v.x;
+	m[1][0] = v.y;
+	m[2][0] = v.z;
+	m[3][0] = 1.f;
+	return m;
+}
+Matrix RotationX(float fAngleRad) {
+	Matrix res = Matrix::identity();
+	/*
+		1,		0,					0,					0,
+		0,		cosf(fAngleRad),	-sinf(fAngleRad),	0,
+		0,		sinf(fAngleRad),	cosf(fAngleRad),	0,
+		0,		0,					0,					1
+	*/
+	res[1][1] = cosf(fAngleRad);
+	res[1][2] = -sinf(fAngleRad);
+	res[2][1] = sinf(fAngleRad);
+	res[2][2] = cosf(fAngleRad);
+	return res;
+}
+Matrix RotationY(float fAngleRad) {
+	Matrix res = Matrix::identity();
+	/*
+		cosf(fAngleRad),		0,		sinf(fAngleRad),	0,
+		0,						1,		0,					0,
+		-sinf(fAngleRad),		0,		cosf(fAngleRad),	0,
+		0,						0,		0,					1
+	*/
+	res[0][0] = cosf(fAngleRad);
+	res[0][2] = sinf(fAngleRad);
+	res[2][0] = -sinf(fAngleRad);
+	res[2][2] = cosf(fAngleRad);
+	return res;
+}
+Matrix RotationZ(float fAngleRad) {
+	Matrix res = Matrix::identity();
+	/*
+		cosf(fAngleRad),	-sinf(fAngleRad),		0,			0,
+		sinf(fAngleRad),	cosf(fAngleRad),		0,			0,
+		0,					0,						1,			0,
+		0,					0,						0,			1
+	*/
+	res[0][0] = cosf(fAngleRad);
+	res[0][1] = -sinf(fAngleRad);
+	res[1][0] = sinf(fAngleRad);
+	res[1][1] = cosf(fAngleRad);
+	return res;
+}
+Matrix RotationByAxis(float x, float y, float z, float theta) {
+	Matrix res = Matrix::identity();
+	/*
+		cosf(fAngleRad),	-sinf(fAngleRad),		0,			0,
+		sinf(fAngleRad),	cosf(fAngleRad),		0,			0,
+		0,					0,						1,			0,
+		0,					0,						0,			1
+	*/
+	float qsin = sinf(theta * 0.5f);
+	float qcos = cosf(theta * 0.5f);
+	float w = qcos;
+	Vec3f v(x, y, z);
+	v.normalize();
+	x = v.x * qsin;
+	y = v.y * qsin;
+	z = v.z * qsin;
+
+	Vec3f v1(1 - 2 * y * y - 2 * z * z, 2 * x * y + 2 * w * z, 2 * x * z - 2 * w * y);
+	Vec3f v2(2 * x * y - 2 * w * z, 1 - 2 * x * x - 2 * z * z, 2 * y * z + 2 * w * x);
+	Vec3f v3(2 * x * z + 2 * w * y, 2 * y * z - 2 * w * x, 1 - 2 * x * x - 2 * y * y);
+	res.set_col(0, embed<4>(v1));
+	res.set_col(1, embed<4>(v2));
+	res.set_col(2, embed<4>(v3));
+	res[0][3] = res[1][3] = res[2][3] = 0;
+	res[3][0] = res[3][1] = res[3][2] = 0;
+	return res;
+}
 //-----------------------------------------------------------
 
 void testCase();
 //--------------------------------------------------------
 
 Model* model = NULL;
-
-Model* model_test = NULL;
-Model* model_head = NULL;
-Model* model_cube = NULL;
-Model* model_rock = NULL;
-
+Model* model_obj1 = NULL;
+Model* model_obj2 = NULL;
 string dirPath = "../_objfile/testTexture/";
 /*
 african_head
@@ -59,11 +136,10 @@ Vec3f       eye(0, 0, 0);//1, 1, 3
 Vec3f    center(-1, 0, 0);
 Vec3f        up(0, 1, 0);
 
-Vec3f	 vCamera(0, 0, 0.5);// (0,0,0)
-Vec3f   vLookDir(0, 0, 1);//(0, 0, 1)
-float fYaw = 0.0;
+Vec3f	 vCamera(0, 0, 0);
+Vec3f   vLookDir(0, 0, 1);
+float fYaw = 0;
 
-Matrix ModelTrans_ = Matrix::identity();
 
 struct GouraudShader : public IShader {
 	Vec3f varying_intensity; // written by vertex shader, read by fragment shader
@@ -87,6 +163,7 @@ struct GouraudShader : public IShader {
 		return false;
 	}
 };
+
 struct GouraudShader2 : public IShader {
 	Vec3f varying_intensity;
 	mat<2, 3, float> varying_uv;
@@ -123,12 +200,13 @@ struct GouraudShader2 : public IShader {
 		return false;
 	}
 };
+
 struct TextureShader : public IShader {
 	Vec3f varying_intensity; // written by vertex shader, read by fragment shader
 	mat<2, 3, float> varying_uv;  // same as above
 	mat<4, 4, float> uniform_M;   //  Projection*ModelView
 	mat<4, 4, float> uniform_MIT; // (Projection*ModelView).invert_transpose()
-	float scale = 0.5;
+	float scale = 0.3;
 
 	virtual Vec4f vertex(int iface, int nthvert) {
 
@@ -144,185 +222,6 @@ struct TextureShader : public IShader {
 		TGAColor tc = model->diffuse(uv) * intensity;
 		color = rgb2hex(tc[2], tc[1], tc[0]);//bgra
 		return false;
-	}
-};
-struct LineShader : public IShader {
-	Vec3f varying_intensity; // written by vertex shader, read by fragment shader
-	mat<2, 3, float> varying_uv;  // same as above
-	mat<4, 4, float> uniform_M;   //  Projection*ModelView
-	mat<4, 4, float> uniform_MIT; // (Projection*ModelView).invert_transpose()
-	float scale = 0.5;
-	float range = 1e-2;//1e-2
-
-	virtual Vec4f vertex(int iface, int nthvert) {
-		Vec4f gl_Vertex = embed<4>(model->vert(iface, nthvert) * scale);
-		return Viewport * Projection * ModelView * ModelTrans_ * gl_Vertex;
-	}
-	virtual bool fragment(Vec3f bar, UI32& color) {
-		if (bar[0] < range || bar[1] < range || bar[2] < range) {
-			color = rgb2hex(0 * 255, 0 * 255, 0 * 255);
-		}
-		else {
-			color = rgb2hex(255, 255, 255);
-			//return true;
-		}
-		// 或是return true表示這個點不渲染，即可表示純線框
-		return false;
-	}
-};
-
-/// wireframe-display-with-barycentric-coordinates
-// Implement: Two Methods for Antialiased Wireframe Drawing with Hidden Line Removal
-
-/*
-color = Vec3f(bar[0], bar[1], bar[2]); 這行等價於下面，因為只插值(1,0,0),(0,1,0),(0,0,1)的話，三行合在一起也是一樣的
-如果不是(1,0,0),(0,1,0),(0,0,1)就必須寫完整了
-vec3 cols[3] = { {1, 0, 0}, {0, 1, 0}, {0, 0, 1} };
-vec3 col = {
-			bc_screen.x * colors[0].x + bc_screen.y * colors[1].x + bc_screen.z * colors[2].x,
-			bc_screen.x * colors[0].y + bc_screen.y * colors[1].y + bc_screen.z * colors[2].y,
-			bc_screen.x * colors[0].z + bc_screen.y * colors[1].z + bc_screen.z * colors[2].z
-		};
-*/
-struct WireframeShader : public IShader {
-	mat<4, 4, float> uniform_M;
-	mat<4, 4, float> uniform_MIT;
-	float scale = 0.5;
-
-	Vec2f screen_coords[3];
-
-	//Vec3f wire_color = Vec3f(bar[0], bar[1], bar[2]);
-	Vec3f wire_color = Vec3f(0, 0, 0);
-	Vec3f fill_color = Vec3f(1, 1, 1);
-	float width = 5;
-	float feather = 0.5;
-	int mode = 1;
-
-	virtual Vec4f vertex(int iface, int nthvert) {
-		Vec4f gl_Vertex = embed<4>(model->vert(iface, nthvert) * scale);
-		Vec4f pos = Viewport * Projection * ModelView * ModelTrans_ * gl_Vertex;
-		// 紀錄這片三角形投影後的三個頂點, Clip Space /w-> NDC ->Screen
-		screen_coords[nthvert] = proj<2>(pos / pos[3]);
-
-		return pos;
-	}
-	virtual bool fragment(Vec3f bar, UI32& color) {
-
-		float d = getMinDistToEdge(bar);
-
-		//wire_color = Vec3f(bar[0], bar[1], bar[2]);
-
-		bool discard = false;
-		if (mode == 1) {
-			//wire_color = Vec3f(bar[0], bar[1], bar[2]);
-			discard = drawLine(d, bar, color);
-		}
-		else {
-			discard = drawDash(d, bar, color);
-		}
-
-
-		return discard;
-	}
-	bool drawDash(float d, Vec3f bar, UI32& color) {
-		// draw dash
-		// ref:https://web.archive.org/web/20150906185520/https://forum.libcinder.org/topic/wireframe-shader-implementation
-
-
-		float positionAlong = (std::max)(bar.x, bar.y);
-		if (bar.y < bar.x && bar.y < bar.z) {
-			positionAlong = 1.0 - positionAlong;
-		}
-
-		// one way to calculate interpolation factor
-		float f = bar.x;
-		if (bar.x < min(bar.y, bar.z))
-			f = bar.y;
-		float PI = 3.14159265;
-		float stipple = pow(clamp(2 * sin(f * 21 * PI), 0, 1), 4);
-		float thickness = 1 * stipple;// change width
-
-		Vec3f c;
-		float I = smoothstep(thickness - feather, thickness + feather, d);
-
-		/*if (stipple > 0) {
-			c = wire_color * I + fill_color * (1.0 - I);
-		}
-		else
-		{
-			c = fill_color;
-		}*/
-
-		if (d < thickness) {
-			//float I = exp2(-2 * d * d);
-			c = wire_color * I + fill_color * (1.0 - I);
-			//c = wire_color;
-		}
-		else {
-			c = fill_color;
-			//return true; //discord背景像素的話就可以繪製純線框
-		}
-		color = rgb2hex(c[0] * 255, c[1] * 255, c[2] * 255);
-
-		return false; //no discard this pixel
-	}
-	bool drawLine(float d, Vec3f bar, UI32& color) {
-		//float I = exp2(-2 * d * d);
-		float I = smoothstep(width - feather, width + feather, d);// width +/- 1
-		//fill_color = Vec3f(0, 0, 0);
-		Vec3f c;
-
-		//沒有反鋸齒
-	   /*if (d < width) {
-		   c = wire_color;
-	   }
-	   else {
-		   c = fill_color;
-	   }*/
-		wire_color = Vec3f(bar[0], bar[1], bar[2]);
-		c = wire_color * I + fill_color * (1.0 - I);
-		color = rgb2hex(c[0] * 255, c[1] * 255, c[2] * 255);
-
-		// 僅繪製線框的方法
-		//if (d > 1.25) { return true; }
-		//if (I <= 0.25) { return true; }
-		return false;
-	}
-	// https://stackoverflow.com/questions/28889210/smoothstep-function
-	// https://en.wikipedia.org/wiki/Smoothstep
-	// https://thebookofshaders.com/glossary/?search=smoothstep
-	float smoothstep(float edge0, float edge1, float x) {
-		x = clamp((x - edge0) / (edge1 - edge0), 0.0, 2.0);
-		return  exp2(-2 * x * x);
-	}
-	float clamp(double d, double min, double max) {
-		const double t = d < min ? min : d;
-		return t > max ? max : t;
-	}
-	float getMinDistToEdge(Vec3f bar) {
-		float dist[3];
-		auto getLength = [&](Vec2f& v) {	return std::sqrt(v.x * v.x + v.y * v.y); };
-		// 透過三個頂點與重心座標回推掃描線p點，proj<2>:將Vec3捨棄z值轉換為Vec2
-		// P = A*alpha + B*beta + C*gamma
-		Vec2f p = proj<2>(screen_coords[0] * bar[0] +
-						  screen_coords[1] * bar[1] +
-						  screen_coords[2] * bar[2]);
-
-		Vec2f v0 = screen_coords[2] - screen_coords[1];
-		Vec2f v1 = screen_coords[2] - screen_coords[0];
-		Vec2f v2 = screen_coords[1] - screen_coords[0];
-		// v1,v2外積取得三角形面積，原本要在乘上的1/2，不過後續的運算會消掉
-		float area = abs(v1.x * v2.y - v1.y * v2.x);
-
-		// area*alpha:因為重心座標即為為a,b,c三區域佔總體的面積比值
-		// 可以直接將整體面積(Area)乘上a,b,c重心座標來取得各塊區域面積
-		// 再透過三角形面積=底x高*1/2的公式，與三塊面積取高，得出p點與最各邊界的高，也就是距離d為何
-		dist[0] = area * bar[0] / getLength(v0);
-		dist[1] = area * bar[1] / getLength(v1);
-		dist[2] = area * bar[2] / getLength(v2);
-
-		// 找出最近的邊界距離
-		return min(dist[0], min(dist[1], dist[2]));
 	}
 };
 
@@ -369,10 +268,9 @@ struct NormalShader : public IShader {
 	}
 
 	virtual bool fragment(Vec3f bar, UI32& color) {
-		Vec2f uv = varying_uv * bar;// 重心座標插植
-		// 現在的座標是經過MVP後的光柵階段，所要得出正確的法向量反射，需要反推回空間中的方向
+		Vec2f uv = varying_uv * bar;
 		Vec3f n = proj<3>(uniform_MIT * embed<4>(model->normal(uv))).normalize();
-		Vec3f l = proj<3>(uniform_M * embed<4>(light_dir)).normalize();// 光源方向相對於攝影機移動
+		Vec3f l = proj<3>(uniform_M * embed<4>(light_dir)).normalize();
 
 		float intensity = (std::max)(0.1f, n * l);
 		TGAColor tc = model->diffuse(uv) * intensity;
@@ -405,7 +303,7 @@ int main(void) {
 		return -1;
 
 	device.init(width, height, screen_fb);
-	device.background = rgb2hex(0.85 * 255, 0.85 * 255, 1 * 255);
+	device.background = 0x0;
 
 
 	onLoad();
@@ -421,21 +319,10 @@ int main(void) {
 }
 
 void onLoad() {
-	// 生成藍白方格的texture
-	int i, j;
-	for (j = 0; j < 256; j++) {
-		for (i = 0; i < 256; i++) {
-			int x = i / 32, y = j / 32;
-			texture[j][i] = ((x + y) & 1) ? 0xffffff : 0x3fbcef;
-		}
-	}
 	//model = new Model(dirPath + objName);
 
-	model_head = new Model(dirPath + "african_head.obj");
-	model_cube = new Model(dirPath + "dice.obj");
-	model_rock = new Model(dirPath + "rock.obj");
-
-	model_test = new Model("../_objfile/teapot.obj");// ../_objfile/teapot.obj
+	model_obj1 = new Model(dirPath + "floor.obj");
+	model_obj2 = new Model(dirPath + "african_head.obj");
 }
 void gameMain() {
 	fpsCounting();
@@ -451,6 +338,14 @@ void update(float deltatime) {
 	//cout << deltatime << "\n";
 	if (isRot)
 		fTheta += 0.5f * deltatime;
+
+	//eye.x = 10 * sin(timeSinceEpochMillisec() * 0.001);
+	//eye.z = 10 * sin(timeSinceEpochMillisec() * 0.001) + 10.5;
+
+	//vCamera.x = 1 * sin(timeSinceEpochMillisec() * 0.001);
+	//vCamera.y = 1 * sin(timeSinceEpochMillisec() * 0.001);
+
+	//fYaw += 0.5f * deltatime;
 
 	int sp = 2;
 	if (screen_keys['R']) {
@@ -492,14 +387,14 @@ void update(float deltatime) {
 		fYaw += 1.0f * 0.7f * deltatime;
 	}
 
-	//cout << vCamera << "| " << vLookDir << "| " << fYaw * 180.0f / 3.14f << "\n";
+	cout << vCamera << "| " << vLookDir << "| " << fYaw * 180.0f / 3.14f << "\n";
 }
 
 void render() {
 	device.clear();
 
 	// ------
-	//testCase();
+	testCase();
 	// ------
 
 	Vec3f vTarget(0, 0, 1);
@@ -513,18 +408,22 @@ void render() {
 	lookat(vTarget, vCamera, up);
 	viewport(width / 8, height / 8, width * 3 / 4, height * 3 / 4);
 	projection(-1.f / (vTarget - vCamera).norm());
+
+	//lookat(eye, center, up);
+	//viewport(width / 8, height / 8, width * 3 / 4, height * 3 / 4);
+	//projection(-1.f / (eye - center).norm());
+	//Projection = makeProjection(90.0f, ((float)height / (float)width)*0.75, 0.1f, 1000.0f);
 	light_dir.normalize();
 
-	// set tran
 	Matrix ModelTrans = RotationByAxis(1, 1, 1, fTheta);
 
-	// normal shader
-	/*device.background = 0;
-	NormalShader shader;
+	TextureShader shader;
+
+	// set tran
 	shader.uniform_M = Projection * ModelView;
 	shader.uniform_MIT = (Projection * ModelView).invert_transpose();
 
-	model = model_head;
+	model = model_obj1;
 	for (int i = 0; i < model->nfaces(); i++) {
 		Vec4f screen_coords[3];
 		for (int j = 0; j < 3; j++) {
@@ -532,44 +431,13 @@ void render() {
 		}
 		triangle(screen_coords, shader, device);
 	}
-	return;*/
-
-	model = model_cube;
-
-	ModelTrans_ = RotationByAxis(1, 0, 0, fTheta * 1);
-	ModelTrans_ = RotationByAxis(0, 1, 0, fTheta * 1.5) * ModelTrans_;
-
-	//ModelTrans_ = Matrix::identity();
-	//ModelTrans_ = RotationByAxis(0, 0, 1, 0.1) * ModelTrans_;
-	//ModelTrans_ = RotationByAxis(1, 0, 0, 0.5) * ModelTrans_;
-	ModelTrans_[0][3] = -1;
-	WireframeShader lineshader;
-	//lineshader.mode = 2;
+	model = model_obj2;
 	for (int i = 0; i < model->nfaces(); i++) {
 		Vec4f screen_coords[3];
 		for (int j = 0; j < 3; j++) {
-			screen_coords[j] = lineshader.vertex(i, j);
+			screen_coords[j] = shader.vertex(i, j);
 		}
-		//RENDER_MODE = 1;
-		triangle(screen_coords, lineshader, device);
-	}
-
-	//return;
-
-	model = model_cube;
-
-
-	ModelTrans_[0][3] = 1;
-	WireframeShader lineshader2;
-	lineshader2.mode = 2;
-	lineshader2.fill_color = Vec3f(0.85, 0.85, 1);
-	for (int i = 0; i < model->nfaces(); i++) {
-		Vec4f screen_coords[3];
-		for (int j = 0; j < 3; j++) {
-			screen_coords[j] = lineshader2.vertex(i, j);//暫時先共用幾何lineshader
-		}
-		//RENDER_MODE = 1;
-		triangle(screen_coords, lineshader2, device);
+		triangle(screen_coords, shader, device);
 	}
 }
 

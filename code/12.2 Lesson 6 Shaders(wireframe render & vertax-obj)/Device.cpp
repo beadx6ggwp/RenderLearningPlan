@@ -4,7 +4,7 @@
 // 擴充的繪製功能
 
 // https://www.avrfreaks.net/sites/default/files/triangles.c
-void Device::fillTriangle2(vec3 v1, vec3 v2, vec3 v3, UI32 c)
+void Device::fillTriangle2(Vec3f v1, Vec3f v2, Vec3f v3, UI32 c)
 {
 	auto SWAP = [](int& x, int& y) { int t = x; x = y; y = t; };
 	auto drawline = [&](int sx, int ex, int ny) { for (int i = sx; i <= ex; i++) setPixel(i, ny, c); };
@@ -143,50 +143,60 @@ next:
 	}
 }
 
-void Device::drawTriangle(vec3 v1, vec3 v2, vec3 v3, UI32 c) {
+void Device::drawTriangle(Vec3f v1, Vec3f v2, Vec3f v3, UI32 c) {
 	drawLine(v1.x, v1.y, v2.x, v2.y, c);
 	drawLine(v2.x, v2.y, v3.x, v3.y, c);
 	drawLine(v3.x, v3.y, v1.x, v1.y, c);
 }
 
 
-void Device::filltriangle_bery(vec3 p1, vec3 p2, vec3 p3, UI32 c) {
-	vec3 bboxMin = {
-		std::floor(std::min(p1.x, std::min(p2.x, p3.x))),
-		std::floor(std::min(p1.y, std::min(p2.y, p3.y)))
-	};
-	vec3 bboxMax = {
-		std::ceil(std::max(p1.x, std::max(p2.x, p3.x))),
-		std::ceil(std::max(p1.y, std::max(p2.y, p3.y)))
-	};
-	vec3 p, bc_screen;
-	for (p.x = bboxMin.x; p.x <= bboxMax.x; p.x++) {
-		for (p.y = bboxMin.y; p.y <= bboxMax.y; p.y++) {
-			vec3 bc_screen = barycentric(p1, p2, p3, p);
+void Device::filltriangle_bery(Vec3f* pts, UI32 c) {
+	Vec2f bboxmin(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
+	Vec2f bboxmax(-std::numeric_limits<float>::max(), -std::numeric_limits<float>::max());
+	Vec2f clamp(width - 1, height - 1);
+	for (int i = 0; i < 3; i++) {
+		for (int j = 0; j < 2; j++) {
+			bboxmin[j] = std::max(0.f, std::min(bboxmin[j], pts[i][j]));
+			bboxmax[j] = std::min(clamp[j], std::max(bboxmax[j], pts[i][j]));
+		}
+	}
+
+	Vec3f p, bc_screen;
+	for (p.x = bboxmin.x; p.x <= bboxmax.x; p.x++) {
+		for (p.y = bboxmin.y; p.y <= bboxmax.y; p.y++) {
+			bc_screen = barycentric(proj<2>(pts[0]), proj<2>(pts[1]), proj<2>(pts[2]), proj<2>(p));
+			// check point in tri
 			if (bc_screen.x < 0 || bc_screen.y < 0 || bc_screen.z < 0) continue;
+			p.z = 0;
+			for (int i = 0; i < 3; i++) p.z += pts[i][2] * bc_screen[i];
 			setPixel(p.x, p.y, c);
+
 		}
 	}
 }
-void Device::filltriangle_bery_zbuffer(vec3 p1, vec3 p2, vec3 p3, UI32 c) {
-	vec3 bboxMin = {
-		std::floor(std::min(p1.x, std::min(p2.x, p3.x))),
-		std::floor(std::min(p1.y, std::min(p2.y, p3.y)))
-	};
-	vec3 bboxMax = {
-		std::ceil(std::max(p1.x, std::max(p2.x, p3.x))),
-		std::ceil(std::max(p1.y, std::max(p2.y, p3.y)))
-	};
-	vec3 p, bc_screen;
-	for (p.x = bboxMin.x; p.x <= bboxMax.x; p.x++) {
-		for (p.y = bboxMin.y; p.y <= bboxMax.y; p.y++) {
-			bc_screen = barycentric(p1, p2, p3, p);
+void Device::filltriangle_bery_zbuffer(Vec3f* pts, UI32 c) {
+	Vec2f bboxmin(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
+	Vec2f bboxmax(-std::numeric_limits<float>::max(), -std::numeric_limits<float>::max());
+	Vec2f clamp(width - 1, height - 1);
+	for (int i = 0; i < 3; i++) {
+		for (int j = 0; j < 2; j++) {
+			bboxmin[j] = std::max(0.f, std::min(bboxmin[j], pts[i][j]));
+			bboxmax[j] = std::min(clamp[j], std::max(bboxmax[j], pts[i][j]));
+		}
+	}
+
+	Vec3f p, bc_screen;
+	for (p.x = bboxmin.x; p.x <= bboxmax.x; p.x++) {
+		for (p.y = bboxmin.y; p.y <= bboxmax.y; p.y++) {
+			bc_screen = barycentric(proj<2>(pts[0]), proj<2>(pts[1]), proj<2>(pts[2]), proj<2>(p));
 			// check point in tri
 			if (bc_screen.x < 0 || bc_screen.y < 0 || bc_screen.z < 0) continue;
-			vec3 vz = { p1.z,p2.z,p3.z };
-			p.z = Vector_DotProduct(vz, bc_screen);
+			p.z = 0;
+			for (int i = 0; i < 3; i++) p.z += pts[i][2] * bc_screen[i];
 			if (p.z > zbuffer[(int)p.y][(int)p.x]) {
 				zbuffer[(int)p.y][(int)p.x] = p.z;
+				//UI32 zbuffer_gray = p.z + 50;
+				//setPixel(p.x, p.y, zbuffer_gray | zbuffer_gray << 8 | zbuffer_gray <<16);
 				setPixel(p.x, p.y, c);
 			}
 		}
@@ -194,34 +204,34 @@ void Device::filltriangle_bery_zbuffer(vec3 p1, vec3 p2, vec3 p3, UI32 c) {
 }
 
 
-void Device::filltriangle_bery_testRGB(vec3 p1, vec3 p2, vec3 p3, vec3 colors[]) {
-	vec3 bboxMin = {
-		std::floor(std::min(p1.x, std::min(p2.x, p3.x))),
-		std::floor(std::min(p1.y, std::min(p2.y, p3.y)))
-	};
-	vec3 bboxMax = {
-		std::ceil(std::max(p1.x, std::max(p2.x, p3.x))),
-		std::ceil(std::max(p1.y, std::max(p2.y, p3.y)))
-	};
-	vec3 p, bc_screen;
-	for (p.x = bboxMin.x; p.x <= bboxMax.x; p.x++) {
-		for (p.y = bboxMin.y; p.y <= bboxMax.y; p.y++) {
-			bc_screen = barycentric(p1, p2, p3, p);
+void Device::filltriangle_bery_testRGB(Vec3f* pts, Vec3f colors[]) {
+	Vec2f bboxmin(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
+	Vec2f bboxmax(-std::numeric_limits<float>::max(), -std::numeric_limits<float>::max());
+	Vec2f clamp(width - 1, height - 1);
+	for (int i = 0; i < 3; i++) {
+		for (int j = 0; j < 2; j++) {
+			bboxmin[j] = std::max(0.f, std::min(bboxmin[j], pts[i][j]));
+			bboxmax[j] = std::min(clamp[j], std::max(bboxmax[j], pts[i][j]));
+		}
+	}
+
+	Vec3f p, bc_screen;
+	for (p.x = bboxmin.x; p.x <= bboxmax.x; p.x++) {
+		for (p.y = bboxmin.y; p.y <= bboxmax.y; p.y++) {
+			bc_screen = barycentric(proj<2>(pts[0]), proj<2>(pts[1]), proj<2>(pts[2]), proj<2>(p));
 			// check point in tri
 			if (bc_screen.x < 0 || bc_screen.y < 0 || bc_screen.z < 0) continue;
-			vec3 vz = { p1.z,p2.z,p3.z };
-			p.z = Vector_DotProduct(vz, bc_screen);
+
+			p.z = 0;
+			for (int i = 0; i < 3; i++) p.z += pts[i][2] * bc_screen[i];
 			if (p.z > zbuffer[(int)p.y][(int)p.x]) {
 				zbuffer[(int)p.y][(int)p.x] = p.z;
 
-				vec3 col = {
-					// 先插植R的三個頂點
+				Vec3f col (
 					bc_screen.x * colors[0].x + bc_screen.y * colors[1].x + bc_screen.z * colors[2].x,
-					// 插植G的三個頂點
 					bc_screen.x * colors[0].y + bc_screen.y * colors[1].y + bc_screen.z * colors[2].y,
-					// 插植B的三個頂點
 					bc_screen.x * colors[0].z + bc_screen.y * colors[1].z + bc_screen.z * colors[2].z
-				};
+				);
 				UI32 c = (int)(col.x * 255) << 16 | (int)(col.y * 255) << 8 | (int)(col.z * 255);
 				setPixel(p.x, p.y, c);
 			}

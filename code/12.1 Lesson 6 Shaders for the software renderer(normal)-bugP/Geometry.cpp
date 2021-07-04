@@ -16,93 +16,9 @@ Vec3f barycentric(Vec2f A, Vec2f B, Vec2f C, Vec2f P) {
 		s[i][2] = A[i] - P[i];
 	}
 	Vec3f u = cross(s[0], s[1]);
-	// 因為cross出來的結果應該要是(x,y,z) = u,v,1，但也可能不是1，所以需要(x/z, y/z/, z/z)，怕會有除0問題加z為0本身就是異常，所以做個判斷
 	if (std::abs(u[2]) > 1e-2) // dont forget that u[2] is integer. If it is zero then triangle ABC is degenerate
 		return Vec3f(1.f - (u.x + u.y) / u.z, u.y / u.z, u.x / u.z);
 	return Vec3f(-1, 1, 1); // in this case generate negative coordinates, it will be thrown away by the rasterizator
-}
-
-
-
-Vec3f m2v(Matrix m) {
-	return Vec3f(m[0][0] / m[3][0], m[1][0] / m[3][0], m[2][0] / m[3][0]);
-}
-Matrix v2m(Vec3f v) {
-	mat<4, 4, float> m;
-	m[0][0] = v.x;
-	m[1][0] = v.y;
-	m[2][0] = v.z;
-	m[3][0] = 1.f;
-	return m;
-}
-Matrix RotationX(float fAngleRad) {
-	Matrix res = Matrix::identity();
-	/*
-		1,		0,					0,					0,
-		0,		cosf(fAngleRad),	-sinf(fAngleRad),	0,
-		0,		sinf(fAngleRad),	cosf(fAngleRad),	0,
-		0,		0,					0,					1
-	*/
-	res[1][1] = cosf(fAngleRad);
-	res[1][2] = -sinf(fAngleRad);
-	res[2][1] = sinf(fAngleRad);
-	res[2][2] = cosf(fAngleRad);
-	return res;
-}
-Matrix RotationY(float fAngleRad) {
-	Matrix res = Matrix::identity();
-	/*
-		cosf(fAngleRad),		0,		sinf(fAngleRad),	0,
-		0,						1,		0,					0,
-		-sinf(fAngleRad),		0,		cosf(fAngleRad),	0,
-		0,						0,		0,					1
-	*/
-	res[0][0] = cosf(fAngleRad);
-	res[0][2] = sinf(fAngleRad);
-	res[2][0] = -sinf(fAngleRad);
-	res[2][2] = cosf(fAngleRad);
-	return res;
-}
-Matrix RotationZ(float fAngleRad) {
-	Matrix res = Matrix::identity();
-	/*
-		cosf(fAngleRad),	-sinf(fAngleRad),		0,			0,
-		sinf(fAngleRad),	cosf(fAngleRad),		0,			0,
-		0,					0,						1,			0,
-		0,					0,						0,			1
-	*/
-	res[0][0] = cosf(fAngleRad);
-	res[0][1] = -sinf(fAngleRad);
-	res[1][0] = sinf(fAngleRad);
-	res[1][1] = cosf(fAngleRad);
-	return res;
-}
-Matrix RotationByAxis(float x, float y, float z, float theta) {
-	Matrix res = Matrix::identity();
-	/*
-		cosf(fAngleRad),	-sinf(fAngleRad),		0,			0,
-		sinf(fAngleRad),	cosf(fAngleRad),		0,			0,
-		0,					0,						1,			0,
-		0,					0,						0,			1
-	*/
-	float qsin = sinf(theta * 0.5f);
-	float qcos = cosf(theta * 0.5f);
-	float w = qcos;
-	Vec3f v(x, y, z);
-	v.normalize();
-	x = v.x * qsin;
-	y = v.y * qsin;
-	z = v.z * qsin;
-
-	Vec3f v1(1 - 2 * y * y - 2 * z * z, 2 * x * y + 2 * w * z, 2 * x * z - 2 * w * y);
-	Vec3f v2(2 * x * y - 2 * w * z, 1 - 2 * x * x - 2 * z * z, 2 * y * z + 2 * w * x);
-	Vec3f v3(2 * x * z + 2 * w * y, 2 * y * z - 2 * w * x, 1 - 2 * x * x - 2 * y * y);
-	res.set_col(0, embed<4>(v1));
-	res.set_col(1, embed<4>(v2));
-	res.set_col(2, embed<4>(v3));
-	res[0][3] = res[1][3] = res[2][3] = 0;
-	res[3][0] = res[3][1] = res[3][2] = 0;
-	return res;
 }
 
 ////////////////////////////////////////////////
