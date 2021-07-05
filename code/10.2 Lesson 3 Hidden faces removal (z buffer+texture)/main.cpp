@@ -160,7 +160,8 @@ void filltriangle_bery_texture(vec3 p1, vec3 p2, vec3 p3, vec3 vt[]) {
 			p.z = Vector_DotProduct(vz, bc_screen);
 			if (p.z > device.zbuffer[(int)p.y][(int)p.x]) {
 				device.zbuffer[(int)p.y][(int)p.x] = p.z;
-
+				// 重心座標轉換到P點, 三角形頂點A(vt0),B(vt1),C(vt2)
+				// P = A*alpha + B*beta + C*gamma
 				vec3 col = {
 					bc_screen.x * vt[0].x + bc_screen.y * vt[1].x + bc_screen.z * vt[2].x,
 					bc_screen.x * vt[0].y + bc_screen.y * vt[1].y + bc_screen.z * vt[2].y,
