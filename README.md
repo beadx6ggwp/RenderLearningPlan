@@ -68,6 +68,8 @@ Soft Render [理想目標](https://github.com/ZeusYang/TinySoftRenderer):
 - [X] normap mapping 法向量貼圖
 - [X] Phone Shading 像素法向量差值 之後可使用normap mapping
 - [X] 簡易Pipeline
+- [X] Wireframe Render
+- [ ] Accelerated Half-Space Triangle Rasterization
 - [ ] Shadow mapping
 - [ ] 複數平面
 - [ ] 四元數旋轉變換
@@ -147,7 +149,9 @@ MSVC STL source code:https://github.com/microsoft/STL
 2021/06 basic shader & Normal mapping & Render pipeline
 ![](https://i.imgur.com/G2H4F7H.png)
 
+
 07/03 wireframe render
+
 https://davidhsu666.com/archives/wireframe-display/
 ![](https://i.imgur.com/sw5v2YO.png)
 
