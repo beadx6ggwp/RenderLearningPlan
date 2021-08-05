@@ -147,6 +147,10 @@ MSVC STL source code:https://github.com/microsoft/STL
 2021/06 basic shader & Normal mapping & Render pipeline
 ![](https://i.imgur.com/G2H4F7H.png)
 
+07/03 wireframe render
+https://davidhsu666.com/archives/wireframe-display/
+![](https://i.imgur.com/sw5v2YO.png)
+
 ## 原理
 
 ![Imgur](https://i.imgur.com/r53RDTZ.png)
