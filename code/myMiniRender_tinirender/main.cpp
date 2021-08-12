@@ -194,8 +194,8 @@ struct WireframeShader : public IShader {
 	//Vec3f wire_color = Vec3f(bar[0], bar[1], bar[2]);
 	Vec3f wire_color = Vec3f(0, 0, 0);
 	Vec3f fill_color = Vec3f(1, 1, 1);
-	float width = 5;
-	float feather = 0.5;
+	float width = 5; // 線框寬度
+	float feather = 0.5; // 反鋸齒作用的範圍+/-
 	int mode = 1;
 
 	virtual Vec4f vertex(int iface, int nthvert) {
@@ -279,7 +279,8 @@ struct WireframeShader : public IShader {
 	   else {
 		   c = fill_color;
 	   }*/
-		wire_color = Vec3f(bar[0], bar[1], bar[2]);
+	    // 線框顏色插值RGB
+		//wire_color = Vec3f(bar[0], bar[1], bar[2]);
 		c = wire_color * I + fill_color * (1.0 - I);
 		color = rgb2hex(c[0] * 255, c[1] * 255, c[2] * 255);
 
@@ -534,16 +535,14 @@ void render() {
 	}
 	return;*/
 
-	model = model_cube;
+	model = model_test;
 
-	ModelTrans_ = RotationByAxis(1, 0, 0, fTheta * 1);
-	ModelTrans_ = RotationByAxis(0, 1, 0, fTheta * 1.5) * ModelTrans_;
+	//ModelTrans_ = RotationByAxis(1, 0, 0, fTheta * 1);
+	//ModelTrans_ = RotationByAxis(0, 1, 0, fTheta * 1.5) * ModelTrans_;
 
-	//ModelTrans_ = Matrix::identity();
-	//ModelTrans_ = RotationByAxis(0, 0, 1, 0.1) * ModelTrans_;
-	//ModelTrans_ = RotationByAxis(1, 0, 0, 0.5) * ModelTrans_;
-	ModelTrans_[0][3] = -1;
+	//ModelTrans_[0][3] = -1;
 	WireframeShader lineshader;
+	lineshader.width = 0.1;
 	//lineshader.mode = 2;
 	for (int i = 0; i < model->nfaces(); i++) {
 		Vec4f screen_coords[3];
@@ -552,24 +551,6 @@ void render() {
 		}
 		//RENDER_MODE = 1;
 		triangle(screen_coords, lineshader, device);
-	}
-
-	//return;
-
-	model = model_cube;
-
-
-	ModelTrans_[0][3] = 1;
-	WireframeShader lineshader2;
-	lineshader2.mode = 2;
-	lineshader2.fill_color = Vec3f(0.85, 0.85, 1);
-	for (int i = 0; i < model->nfaces(); i++) {
-		Vec4f screen_coords[3];
-		for (int j = 0; j < 3; j++) {
-			screen_coords[j] = lineshader2.vertex(i, j);//暫時先共用幾何lineshader
-		}
-		//RENDER_MODE = 1;
-		triangle(screen_coords, lineshader2, device);
 	}
 }
 
