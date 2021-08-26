@@ -436,7 +436,7 @@ void onLoad() {
 	model_cube = new Model(dirPath + "dice.obj");
 	model_rock = new Model(dirPath + "rock.obj");
 
-	model_test = new Model("../_objfile/teapot.obj");// ../_objfile/teapot.obj
+	model_test = new Model("../_objfile/VideoShip.obj");// ../_objfile/teapot.obj
 }
 void gameMain() {
 	fpsCounting();
