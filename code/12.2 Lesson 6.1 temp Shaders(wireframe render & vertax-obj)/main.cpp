@@ -18,7 +18,7 @@ void gameMain();
 void update(float deltatime);
 void render();
 //-----------------------------------------
-const int width = 400, height = 400, depth = 255;
+const int width = 800, height = 800, depth = 255;
 Device device;
 
 UI32 texture[256][256];
@@ -170,20 +170,21 @@ struct LineShader : public IShader {
 		return false;
 	}
 };
-struct WireframeShader : public IShader {
-	/// wireframe-display-with-barycentric-coordinates
-	// Implement: Two Methods for Antialiased Wireframe Drawing with Hidden Line Removal
 
-	/*
-	color = Vec3f(bar[0], bar[1], bar[2]); 這行等價於下面，因為只插值(1,0,0),(0,1,0),(0,0,1)的話，三行合在一起也是一樣的
-	如果不是(1,0,0),(0,1,0),(0,0,1)就必須寫完整了
-	vec3 cols[3] = { {1, 0, 0}, {0, 1, 0}, {0, 0, 1} };
-	vec3 col = {
-				bc_screen.x * colors[0].x + bc_screen.y * colors[1].x + bc_screen.z * colors[2].x,
-				bc_screen.x * colors[0].y + bc_screen.y * colors[1].y + bc_screen.z * colors[2].y,
-				bc_screen.x * colors[0].z + bc_screen.y * colors[1].z + bc_screen.z * colors[2].z
-			};
-	*/
+/// wireframe-display-with-barycentric-coordinates
+// Implement: Two Methods for Antialiased Wireframe Drawing with Hidden Line Removal
+
+/*
+color = Vec3f(bar[0], bar[1], bar[2]); 這行等價於下面，因為只插值(1,0,0),(0,1,0),(0,0,1)的話，三行合在一起也是一樣的
+如果不是(1,0,0),(0,1,0),(0,0,1)就必須寫完整了
+vec3 cols[3] = { {1, 0, 0}, {0, 1, 0}, {0, 0, 1} };
+vec3 col = {
+			bc_screen.x * colors[0].x + bc_screen.y * colors[1].x + bc_screen.z * colors[2].x,
+			bc_screen.x * colors[0].y + bc_screen.y * colors[1].y + bc_screen.z * colors[2].y,
+			bc_screen.x * colors[0].z + bc_screen.y * colors[1].z + bc_screen.z * colors[2].z
+		};
+*/
+struct WireframeShader : public IShader {
 	mat<4, 4, float> uniform_M;
 	mat<4, 4, float> uniform_MIT;
 	float scale = 0.5;
@@ -200,11 +201,9 @@ struct WireframeShader : public IShader {
 	virtual Vec4f vertex(int iface, int nthvert) {
 		Vec4f gl_Vertex = embed<4>(model->vert(iface, nthvert) * scale);
 		Vec4f pos = Viewport * Projection * ModelView * ModelTrans_ * gl_Vertex;
-
-		pos = Viewport * Projection * ModelTrans_ * gl_Vertex;
-
 		// 紀錄這片三角形投影後的三個頂點, Clip Space /w-> NDC ->Screen
 		screen_coords[nthvert] = proj<2>(pos / pos[3]);
+
 		return pos;
 	}
 	virtual bool fragment(Vec3f bar, UI32& color) {
@@ -280,8 +279,8 @@ struct WireframeShader : public IShader {
 	   else {
 		   c = fill_color;
 	   }*/
-	   // 線框顏色插值RGB
-	   //wire_color = Vec3f(bar[0], bar[1], bar[2]);
+	    // 線框顏色插值RGB
+		//wire_color = Vec3f(bar[0], bar[1], bar[2]);
 		c = wire_color * I + fill_color * (1.0 - I);
 		color = rgb2hex(c[0] * 255, c[1] * 255, c[2] * 255);
 
@@ -327,6 +326,7 @@ struct WireframeShader : public IShader {
 		return min(dist[0], min(dist[1], dist[2]));
 	}
 };
+
 struct NornmalImgShader : public IShader {
 	// bug
 	Vec3f varying_intensity;
@@ -352,6 +352,7 @@ struct NornmalImgShader : public IShader {
 		return false;
 	}
 };
+
 struct NormalShader : public IShader {
 	/*
 	|v0x v1x v2x|
@@ -388,11 +389,11 @@ Matrix makeProjection(float fFovDegrees, float fAspectRatio, float fNear, float 
 	Matrix matrix = Matrix::identity();
 	Vec3f c0(fAspectRatio * fFovRad, 0, 0);
 	Vec3f c1(0, fFovRad, 0);
-	Vec3f c2(0, 0, -fFar / (fFar - fNear));
-	Vec3f c3(0, 0, -(fFar * fNear) / (fFar - fNear));
+	Vec3f c2(0, 0, fFar / (fFar - fNear));
+	Vec3f c3(0, 0, (fFar * fNear) / (fFar - fNear));
 	matrix.set_col(0, embed<4>(c0, 0.0f));
 	matrix.set_col(1, embed<4>(c1, 0.0f));
-	matrix.set_col(2, embed<4>(c2, -1.0f));
+	matrix.set_col(2, embed<4>(c2, 1.0f));
 	matrix.set_col(3, embed<4>(c3, 0.0f));
 	return matrix;
 }
@@ -421,10 +422,6 @@ int main(void) {
 }
 
 void onLoad() {
-	Matrix testmat = Matrix::identity();
-	testmat.set_col(0, embed<4>(Vec3f(1, 2, 3), 1.f));
-	cout << testmat;
-
 	// 生成藍白方格的texture
 	int i, j;
 	for (j = 0; j < 256; j++) {
@@ -515,12 +512,8 @@ void render() {
 	vTarget = vCamera + vLookDir;
 
 	lookat(vTarget, vCamera, up);
-	//viewport(width / 8, height / 8, width * 3 / 4, height * 3 / 4);
-	viewport(0, 0, width, height);
-
-	//projection(-1.f / (vTarget - vCamera).norm());
-	Projection = makeProjection(90.0f, (float)height / (float)width, 0.1f, 1000.0f);
-
+	viewport(width / 8, height / 8, width * 3 / 4, height * 3 / 4);
+	projection(-1.f / (vTarget - vCamera).norm());
 	light_dir.normalize();
 
 	// set tran
@@ -542,12 +535,11 @@ void render() {
 	}
 	return;*/
 
-	model = model_cube;
+	model = model_test;
 
 	//ModelTrans_ = RotationByAxis(1, 0, 0, fTheta * 1);
 	//ModelTrans_ = RotationByAxis(0, 1, 0, fTheta * 1.5) * ModelTrans_;
 
-	ModelTrans_.set_col(3, embed<4>(Vec3f(0.0, 0.0, -2)));// right-hand
 	//ModelTrans_[0][3] = -1;
 	WireframeShader lineshader;
 	lineshader.width = 0.1;
@@ -557,7 +549,7 @@ void render() {
 		for (int j = 0; j < 3; j++) {
 			screen_coords[j] = lineshader.vertex(i, j);
 		}
-		RENDER_MODE = 1;
+		//RENDER_MODE = 1;
 		triangle(screen_coords, lineshader, device);
 	}
 }

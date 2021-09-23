@@ -1,4 +1,3 @@
-#include <iostream>
 #include <cmath>
 #include <limits>
 #include <cstdlib>
@@ -27,45 +26,24 @@ void viewport(int x, int y, int w, int h) {
 
 void projection(float coeff) {
 	Projection = Matrix::identity();
-	//Projection[3][2] = coeff;
-	//------------------
-
-	//float fFovDegrees = 90.0f;
-	//float fAspectRatio = 800.0f / 800.0f;// h/w
-	//float fNear = 0.1f;
-	//float fFar = 1000.0f;
-
-	//float fFovRad = 1.0f / tanf(fFovDegrees * 0.5f / 180.0f * 3.14159f);
-
-	//Projection.set_col(0, embed<4>(Vec3f(fAspectRatio * fFovRad, 0, 0), 0.0f));
-	//Projection.set_col(1, embed<4>(Vec3f(0, fFovRad, 0), 0.0f));
-	//Projection.set_col(2, embed<4>(Vec3f(0, 0, fFar / (fFar - fNear)), 1.0f));
-	//Projection.set_col(3, embed<4>(Vec3f(0, 0, (-fFar * fNear) / (fFar - fNear)), 0.0f));
+	Projection[3][2] = coeff;
 }
 
 // target pos
-void lookat(Vec3f pos, Vec3f target, Vec3f up) {
-	Vec3f zaxis = (pos - target).normalize();
-	Vec3f xaxis = cross(up, zaxis).normalize();
-	Vec3f yaxis = cross(zaxis, xaxis).normalize();
-
-	Matrix trans = Matrix::identity();
-	trans.set_col(3, embed<4>(Vec3f(-pos.x, -pos.y, -pos.z)));
-
-	Matrix rot = Matrix::identity();
-	rot[0][0] = xaxis.x;
-	rot[1][0] = xaxis.y;
-	rot[2][0] = xaxis.z;
-
-	rot[0][1] = yaxis.x;
-	rot[1][1] = yaxis.y;
-	rot[2][1] = yaxis.z;
-
-	rot[0][2] = zaxis.x;
-	rot[1][2] = zaxis.y;
-	rot[2][2] = zaxis.z;
-
-	ModelView = rot * trans;
+void lookat(Vec3f eye, Vec3f center, Vec3f up) {
+	Vec3f z = (eye - center).normalize();
+	Vec3f x = cross(up, z).normalize();
+	Vec3f y = cross(z, x).normalize();
+	ModelView = Matrix::identity();
+	for (int i = 0; i < 3; i++) {
+		ModelView[0][i] = x[i];
+		ModelView[1][i] = y[i];
+		ModelView[2][i] = z[i];
+		ModelView[i][3] = -center[i];
+	}
+	//ModelView[0][3] = center * x;
+	//ModelView[1][3] = center * y;
+	//ModelView[2][3] = center * z;
 }
 
 void triangle(Vec4f* pts, IShader& shader, Device& device) {
