@@ -201,7 +201,7 @@ struct WireframeShader : public IShader {
 		Vec4f gl_Vertex = embed<4>(model->vert(iface, nthvert) * scale);
 		Vec4f pos = Viewport * Projection * ModelView * ModelTrans_ * gl_Vertex;
 
-		pos = Viewport * Projection * ModelTrans_ * gl_Vertex;
+		//pos = Viewport * Projection * ModelTrans_ * gl_Vertex;
 
 		// 紀錄這片三角形投影後的三個頂點, Clip Space /w-> NDC ->Screen
 		screen_coords[nthvert] = proj<2>(pos / pos[3]);
@@ -388,7 +388,7 @@ Matrix makeProjection(float fFovDegrees, float fAspectRatio, float fNear, float 
 	Matrix matrix = Matrix::identity();
 	Vec3f c0(fAspectRatio * fFovRad, 0, 0);
 	Vec3f c1(0, fFovRad, 0);
-	Vec3f c2(0, 0, -fFar / (fFar - fNear));
+	Vec3f c2(0, 0, fFar / (fFar - fNear));
 	Vec3f c3(0, 0, -(fFar * fNear) / (fFar - fNear));
 	matrix.set_col(0, embed<4>(c0, 0.0f));
 	matrix.set_col(1, embed<4>(c1, 0.0f));
@@ -416,7 +416,11 @@ int main(void) {
 
 		screen_update();// swow framebuffer to screen
 		//Sleep(1);
+
+		//break;
 	}
+	cout << "======\nover\n======\n";
+	cin.get();
 	return 0;
 }
 
@@ -439,7 +443,7 @@ void onLoad() {
 	model_cube = new Model(dirPath + "dice.obj");
 	model_rock = new Model(dirPath + "rock.obj");
 
-	model_test = new Model("../_objfile/VideoShip.obj");// ../_objfile/teapot.obj
+	model_test = new Model("../_objfile/tritest.obj");// ../_objfile/teapot.obj
 }
 void gameMain() {
 	fpsCounting();
@@ -544,11 +548,11 @@ void render() {
 
 	model = model_cube;
 
-	//ModelTrans_ = RotationByAxis(1, 0, 0, fTheta * 1);
+	ModelTrans_ = RotationByAxis(1, 0, 0, fTheta * 1);
 	//ModelTrans_ = RotationByAxis(0, 1, 0, fTheta * 1.5) * ModelTrans_;
 
-	ModelTrans_.set_col(3, embed<4>(Vec3f(0.0, 0.0, -2)));// right-hand
-	//ModelTrans_[0][3] = -1;
+	ModelTrans_.set_col(3, embed<4>(Vec3f(0.0, 0.0, -2.0)));// right-hand
+	//ModelTrans_[1][3] = -1;
 	WireframeShader lineshader;
 	lineshader.width = 0.1;
 	//lineshader.mode = 2;
@@ -557,9 +561,25 @@ void render() {
 		for (int j = 0; j < 3; j++) {
 			screen_coords[j] = lineshader.vertex(i, j);
 		}
-		RENDER_MODE = 1;
+		//RENDER_MODE = 1;
 		triangle(screen_coords, lineshader, device);
 	}
+
+	return;
+	for (int x = 0; x < device.width; x++) {
+		for (int y = 0; y < device.width; y++) {
+
+			float d = device.zbuffer[y][x];
+			int c = d + 255;
+			device.setPixel(x, y, rgb2hex(c,c,c));
+
+			if (d > -(std::numeric_limits<float>::max)())
+				cout << d;
+		}
+		cout << "\n";
+	}
+
+
 }
 
 void testCase() {

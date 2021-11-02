@@ -111,7 +111,7 @@ void triangle(Vec4f* pts, IShader& shader, Device& device) {
 			int frag_depth = std::max(0, std::min(255, int(z / w + .5)));
 			float zbuffer = device.zbuffer[(int)P.y][(int)P.x];
 
-			if (c.x < 0 || c.y < 0 || c.z<0 || zbuffer > frag_depth) continue;
+			if (c.x < 0 || c.y < 0 || c.z<0 || zbuffer >= frag_depth) continue;
 			bool discard = shader.fragment(c, color);
 			if (!discard) {
 				device.zbuffer[(int)P.y][(int)P.x] = frag_depth;
