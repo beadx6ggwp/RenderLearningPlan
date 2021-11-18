@@ -157,7 +157,14 @@ https://davidhsu666.com/archives/wireframe-display/
 
 11/5  Fixed Camera & Perspective
 
+naive interpolation
+
+![](https://i.imgur.com/1NGwg8D.jpg)
+
+Perspective Correct Interpolation and Vertex Attributes
+
 ![](https://i.imgur.com/fuuu3rD.gif)
+
 
 ## 原理
 
