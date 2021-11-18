@@ -8,12 +8,10 @@ extern int RENDER_MODE;// 應該要改成enum來表示
 extern Matrix ModelView;
 extern Matrix Viewport;
 extern Matrix Projection;
-extern float gl_zFar;
-extern float gl_zNear;
 
 void viewport(int x, int y, int w, int h);
 void projection(float coeff = 0.f); // coeff = -1/c
-void lookat(Vec3f pos, Vec3f target, Vec3f up);
+void lookat(Vec3f eye, Vec3f center, Vec3f up);
 
 struct IShader {
     virtual ~IShader();
