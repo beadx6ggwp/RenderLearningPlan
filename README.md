@@ -60,7 +60,7 @@ Soft Render [理想目標](https://github.com/ZeusYang/TinySoftRenderer):
 - [X] [Line/Tri RGB gradient](https://www.youtube.com/watch?v=t7Ztio8cwqM)
 - [X] 三角重心插值轉換
 - [X] RGB三點插值三角形
-- [ ] 投影轉換的1/z,投影產生的非線性問題
+- [X] 投影轉換的1/z,投影產生的非線性問題
 - [X] 合併z-buffer & texture & 投影轉換
 - [X] 圖片讀取 & 貼圖載入
 - [X] Blender編輯紋理模型與讀取
