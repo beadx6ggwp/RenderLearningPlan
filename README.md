@@ -158,6 +158,10 @@ https://davidhsu666.com/archives/wireframe-display/
 
 11/5  Fixed Camera & Perspective
 
+Now Matrix: M(ViewPort)M(Projection)M(View)M(Model)Vertex
+
+M(Pjorection) = M(ortho)M(persptive)
+
 naive interpolation
 
 ![](https://i.imgur.com/1NGwg8D.jpg)
