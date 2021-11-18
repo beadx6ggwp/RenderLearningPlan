@@ -110,6 +110,7 @@ MSVC STL source code:https://github.com/microsoft/STL
 - [現代啟示錄 正交投影──威力強大的線代工具](https://ccjou.wordpress.com/2010/04/19/%e6%ad%a3%e4%ba%a4%e6%8a%95%e5%bd%b1-%e5%a8%81%e5%8a%9b%e5%bc%b7%e5%a4%a7%e7%9a%84%e4%bb%a3%e6%95%b8%e5%b7%a5%e5%85%b7/)
 - [電腦圖學渲染管線](https://www.slideshare.net/riverwang54/20170621-77540223)
 - Math for Game Programmers: Understanding Homogeneous Coordinates:[youtube](https://www.youtube.com/watch?v=o1n02xKP138)
+- [透视矫正插值和图形渲染管线总结-孙小磊](https://zhuanlan.zhihu.com/p/144331875)
 
 書單:allenchou.net/2014/03/book-list-game-devs/
 
