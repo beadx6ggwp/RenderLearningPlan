@@ -81,6 +81,7 @@ Soft Render [理想目標](https://github.com/ZeusYang/TinySoftRenderer):
 ## 補充資料
 
 MSVC STL source code:https://github.com/microsoft/STL
+gcc source code:https://github.com/gcc-mirror/gcc
 
 理論:
 - 3Blue1Brown 線性代數的本質: https://www.bilibili.com/video/BV1ys411472E
