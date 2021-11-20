@@ -1,6 +1,7 @@
 ﻿#include <iostream>
 #include <cmath>
 #include <limits>
+#include <map>
 
 #include "tool.h"
 #include "geometry.h"
@@ -43,7 +44,10 @@ Model* model_cube = NULL;
 Model* model_rock = NULL;
 Model* model_floor = NULL;
 
-string dirPath = "../_objfile/testTexture/";
+string dirPath = "../_objfile/";
+
+map<string, Model*> model_list;
+vector<string> render_list;
 /*
 african_head
 rock
@@ -449,6 +453,18 @@ Matrix makeProjection(float fovDeg, float aspect, float zNear, float zFar)
 	// matrix = M(ortho)*M(persp)
 	return matrix;
 }
+
+void RenderModel(string modelName, IShader& shader) {
+	model = model_list[modelName];
+	for (int i = 0; i < model->nfaces(); i++) {
+		Vec4f screen_coords[3];
+		for (int j = 0; j < 3; j++) {
+			screen_coords[j] = shader.vertex(i, j);
+		}
+		triangle2(screen_coords, shader, device);
+	}
+}
+
 int main(void) {
 
 	const TCHAR* title = _T("Win32");
@@ -487,13 +503,21 @@ void onLoad() {
 	}
 	//model = new Model(dirPath + objName);
 
-	model_head = new Model(dirPath + "african_head.obj");
-	model_cube = new Model(dirPath + "dice.obj");
-	model_rock = new Model(dirPath + "rock.obj");
-	model_floor = new Model(dirPath + "floor.obj");
+	model_cube = new Model(dirPath + "testTexture/dice.obj");
+	model_rock = new Model(dirPath + "testTexture/rock.obj");
+	model_floor = new Model(dirPath + "testTexture/floor.obj");
 
 	//model_test = new Model("../_objfile/test_tri1.obj");// ../_objfile/teapot.obj
 	model_test = new Model("../_objfile/Marry.obj");// ../_objfile/teapot.obj
+
+	model_list["floor"] = new Model(dirPath + "testTexture/floor.obj");
+	model_list["rock"] = new Model(dirPath + "testTexture/rock.obj");
+	model_list["Marry"] = new Model("../_objfile/Marry.obj");
+	model_list["african_head"] = new Model(dirPath + "african/african_head.obj");
+	model_list["african_head_eye_inner"] = new Model(dirPath + "african/african_head_eye_inner.obj");
+	model_list["african_head_eye_outer"] = new Model(dirPath + "african/african_head_eye_outer.obj");
+	model_list["matsumoto"] = new Model(dirPath + "testTexture/matsumoto.obj");
+	model_list["capsule"] = new Model(dirPath + "testTexture/capsule.obj");	
 }
 void gameMain() {
 	fpsCounting();
@@ -593,14 +617,7 @@ void render() {
 	shader.uniform_M = Projection * ModelView;
 	shader.uniform_MIT = (Projection * ModelView).invert_transpose();
 
-	model = model_floor;
-	for (int i = 0; i < model->nfaces(); i++) {
-		Vec4f screen_coords[3];
-		for (int j = 0; j < 3; j++) {
-			screen_coords[j] = shader.vertex(i, j);
-		}
-		triangle2(screen_coords, shader, device);
-	}
+	RenderModel("floor", shader);
 
 
 	ModelTrans_ = Matrix::identity();
@@ -608,64 +625,39 @@ void render() {
 	shader.uniform_M = Projection * ModelView;
 	shader.uniform_MIT = (Projection * ModelView).invert_transpose();
 
-	model = model_floor;
-	for (int i = 0; i < model->nfaces(); i++) {
-		Vec4f screen_coords[3];
-		for (int j = 0; j < 3; j++) {
-			screen_coords[j] = shader.vertex(i, j);
-		}
-		triangle2(screen_coords, shader, device);
-	}
+
+	RenderModel("floor", shader);
 
 	ModelTrans_ = Matrix::identity();
 	ModelTrans_.set_col(3, embed<4>(Vec3f(-1.0, 0, 0)));
 	shader.uniform_M = Projection * ModelView;
 	shader.uniform_MIT = (Projection * ModelView).invert_transpose();
 
-	model = model_floor;
-	for (int i = 0; i < model->nfaces(); i++) {
-		Vec4f screen_coords[3];
-		for (int j = 0; j < 3; j++) {
-			screen_coords[j] = shader.vertex(i, j);
-		}
-		triangle2(screen_coords, shader, device);
-	}
+	RenderModel("floor", shader);
 
 	// ----------------------------
 	// Obj2----------------------------
-	NormalImgShader shader_obj2;
-	shader_obj2.scale = 0.4;
+	NormalImgShader shaderHead_nm;
+	shaderHead_nm.scale = 0.4;
 	ModelTrans_ = Matrix::identity();
 	ModelTrans_.set_col(3, embed<4>(Vec3f(-0.3, 0, -0.4)));
-	shader_obj2.uniform_M = Projection * ModelView;
-	shader_obj2.uniform_MIT = (Projection * ModelView).invert_transpose();
+	shaderHead_nm.uniform_M = Projection * ModelView;
+	shaderHead_nm.uniform_MIT = (Projection * ModelView).invert_transpose();
 
-	model = model_head;
-	for (int i = 0; i < model->nfaces(); i++) {
-		Vec4f screen_coords[3];
-		for (int j = 0; j < 3; j++) {
-			screen_coords[j] = shader_obj2.vertex(i, j);
-		}
-		triangle2(screen_coords, shader_obj2, device);
-	}
+	RenderModel("african_head", shaderHead_nm);
 
 	// Obj3----------------------------
-	TextureShader shader_obj3;
-	shader_obj3.scale = 0.4;
+	TextureShader shaderHead_test;
+	shaderHead_test.scale = 0.4;
 	ModelTrans_ = Matrix::identity();
 	ModelTrans_.set_col(3, embed<4>(Vec3f(0.3, 0, 0.4)));
-	shader_obj3.uniform_M = Projection * ModelView;
-	shader_obj3.uniform_MIT = (Projection * ModelView).invert_transpose();
+	shaderHead_test.uniform_M = Projection * ModelView;
+	shaderHead_test.uniform_MIT = (Projection * ModelView).invert_transpose();
 
-	model = model_head;
-	for (int i = 0; i < model->nfaces(); i++) {
-		Vec4f screen_coords[3];
-		for (int j = 0; j < 3; j++) {
-			screen_coords[j] = shader_obj3.vertex(i, j);
-		}
-		triangle2(screen_coords, shader_obj3, device);
+	render_list = { "african_head","african_head_eye_inner"};
+	for (auto name : render_list) {
+		RenderModel(name, shaderHead_test);
 	}
-
 
 	// rock----------------------------
 	//device.background = 0;
@@ -675,40 +667,23 @@ void render() {
 	ModelTrans_ = RotationByAxis(1, 0, 0, fTheta * 1);
 	ModelTrans_ = RotationByAxis(0, 1, 0, fTheta * 1.5) * ModelTrans_;
 	ModelTrans_.set_col(3, embed<4>(Vec3f(-1.0, -0.2, 0)));// right-hand
-	shader_rock.scale = 0.15;
+	shader_rock.scale = 0.3;
 	shader_rock.uniform_M = Projection * ModelView;
 	shader_rock.uniform_MIT = (Projection * ModelView).invert_transpose();
 
-	model = model_rock;
-	for (int i = 0; i < model->nfaces(); i++) {
-		Vec4f screen_coords[3];
-		for (int j = 0; j < 3; j++) {
-			screen_coords[j] = shader_rock.vertex(i, j);
-		}
-		triangle2(screen_coords, shader_rock, device);
-	}
+
+	RenderModel("capsule", shader_rock);
 
 	// ----------------
-
-	model = model_test;
-
 	//ModelTrans_ = RotationByAxis(1, 0, 0, fTheta * 1);
 	//ModelTrans_ = RotationByAxis(0, 1, 0, fTheta * 1.5) * ModelTrans_;
 	ModelTrans_ = Matrix::identity();
-
 	ModelTrans_.set_col(3, embed<4>(Vec3f(1.0, -0.4, 0)));// right-hand
 	GouraudShader2 lineshader;
 	lineshader.scale = 0.4;
 	//lineshader.width = 0.1;
 	//lineshader.mode = 2;
-	for (int i = 0; i < model->nfaces(); i++) {
-		Vec4f screen_coords[3];
-		for (int j = 0; j < 3; j++) {
-			screen_coords[j] = lineshader.vertex(i, j);
-		}
-		//RENDER_MODE = 1;
-		triangle2(screen_coords, lineshader, device);
-	}
+	RenderModel("Marry", lineshader);
 }
 
 void testCase() {
