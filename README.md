@@ -169,7 +169,7 @@ naive interpolation
 
 Perspective Correct Interpolation and Vertex Attributes
 
-![](https://i.imgur.com/fuuu3rD.gif)
+![](https://i.imgur.com/C9iTAhd.gif)
 
 
 ## 原理
