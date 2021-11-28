@@ -133,8 +133,9 @@ Vec3f interpolate(float alpha, float beta, float gamma, Vec3f& vert1, Vec3f& ver
 
 void triangle2(Vec4f* pts, IShader& shader, Device& device) {
 	for (int i = 0; i < 3; i++) {
-		float z = pts[i][3];
-		if (abs(z) <= 0.1) {
+		float z = pts[i][2];
+		float w = pts[i][3];
+		if (z / w < gl_zNear) {
 			return;
 		}
 	}
@@ -176,9 +177,16 @@ void triangle2(Vec4f* pts, IShader& shader, Device& device) {
 			// perspective correct texture mapping
 			Vec3f bc_clip = Vec3f(c.x / pts[0][3], c.y / pts[1][3], c.z / pts[2][3]);
 			bc_clip = bc_clip * z;
-			
+
 			//bc_clip = c; // use fixed or not
-			if (zp < device.zbuffer2[get_index(P.x, P.y)]) {
+
+			/*
+			memory out of range, like this
+			vector<int> test(20);
+			test[50000] = 10;
+			*/
+			int ind = get_index(P.x, P.y);
+			if (zp < device.zbuffer2[ind]) {
 
 				//device.setPixel(P.x, P.y, 0xFF0000);
 				bool discard = shader.fragment(bc_clip, color);

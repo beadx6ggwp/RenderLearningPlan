@@ -2,6 +2,7 @@
 #include <cmath>
 #include <limits>
 #include <map>
+#include <iomanip>
 
 #include "tool.h"
 #include "geometry.h"
@@ -19,7 +20,7 @@ void gameMain();
 void update(float deltatime);
 void render();
 //-----------------------------------------
-const int width = 600, height = 600, depth = 255;
+const int width = 400, height = 400, depth = 255;
 Device device;
 
 UI32 texture[256][256];
@@ -106,7 +107,7 @@ struct GouraudShader2 : public IShader {
 		// 計算此三角形與燈光的夾角，決定亮度
 		varying_intensity[nthvert] = (std::max)(0.f, model->normal(iface, nthvert) * light_dir);
 
-		return Viewport * Projection * ModelView * ModelTrans_ * gl_Vertex;
+		return Projection * ModelView * ModelTrans_ * gl_Vertex;
 		//return Viewport * Projection * ModelView * gl_Vertex;
 	}
 
@@ -144,7 +145,7 @@ struct TextureShader : public IShader {
 		varying_intensity[nthvert] = (std::max)(0.f, model->normal(iface, nthvert) * light_dir);
 		Vec4f gl_Vertex = embed<4>(model->vert(iface, nthvert) * scale);
 
-		Vec4f pos = Viewport * Projection * ModelView * ModelTrans_ * gl_Vertex;
+		Vec4f pos = Projection * ModelView * ModelTrans_ * gl_Vertex;
 		return pos;
 		//return Viewport * Projection * ModelView * gl_Vertex;
 	}
@@ -456,11 +457,24 @@ Matrix makeProjection(float fovDeg, float aspect, float zNear, float zFar)
 
 void RenderModel(string modelName, IShader& shader) {
 	model = model_list[modelName];
+	cout << "-\t-\t-\t-\t-\t-\n";
 	for (int i = 0; i < model->nfaces(); i++) {
 		Vec4f screen_coords[3];
+		cout << "[" << i << "]";
 		for (int j = 0; j < 3; j++) {
+			// 最後再處理viewport
 			screen_coords[j] = shader.vertex(i, j);
+
+			//cout << fixed << setprecision(2) << t << " ";
+			screen_coords[j] = Viewport * screen_coords[j];
+
+			auto t = screen_coords[j] / screen_coords[j][3];
+			float a = (gl_zFar - gl_zNear) / 2;
+			float b = (gl_zFar + gl_zNear) / 2;
+			//(t[2] - b) / a			
+			cout << "\t" << fixed << setprecision(2) << t[2] << "," << screen_coords[j][3] << " ";
 		}
+		cout << "\n";
 		triangle2(screen_coords, shader, device);
 	}
 }
@@ -517,7 +531,8 @@ void onLoad() {
 	model_list["african_head_eye_inner"] = new Model(dirPath + "african/african_head_eye_inner.obj");
 	model_list["african_head_eye_outer"] = new Model(dirPath + "african/african_head_eye_outer.obj");
 	model_list["matsumoto"] = new Model(dirPath + "testTexture/matsumoto.obj");
-	model_list["capsule"] = new Model(dirPath + "testTexture/capsule.obj");	
+	model_list["capsule"] = new Model(dirPath + "testTexture/capsule.obj");
+	model_list["test_tri1"] = new Model(dirPath + "test_tri1.obj");
 }
 void gameMain() {
 	fpsCounting();
@@ -534,7 +549,7 @@ void update(float deltatime) {
 	if (isRot)
 		fTheta += 0.5f * deltatime;
 
-	int sp = 2;
+	float sp = 0.5;
 	if (screen_keys['R']) {
 		vCamera = Vec3f(0, 0, 0);
 		fYaw = 0;
@@ -559,7 +574,7 @@ void update(float deltatime) {
 		vCamera = vCamera + newMove;
 	}
 
-	Vec3f vForward = vLookDir * 5.0 * deltatime;
+	Vec3f vForward = vLookDir * sp * deltatime;
 
 	if (screen_keys['W']) {
 		vCamera = vCamera - vForward;
@@ -598,7 +613,7 @@ void render() {
 	//cout << ModelView << '\n';
 
 	//projection(-1.f / (vTarget - vCamera).norm());
-	Projection = makeProjection(90.0f, (float)width / (float)height, 0.1f, 50.0f);
+	Projection = makeProjection(90.0f, (float)width / (float)height, 0.1f, 1000.0f);
 
 	//viewport(width / 8, height / 8, width * 3 / 4, height * 3 / 4);
 	viewport(0, 0, width, height);
@@ -612,12 +627,26 @@ void render() {
 	// texture shader
 	// Obj1----------------------------
 	//device.background = 0;
+
+
+
 	TextureShader shader;
 	ModelTrans_ = Matrix::identity();
 	shader.uniform_M = Projection * ModelView;
 	shader.uniform_MIT = (Projection * ModelView).invert_transpose();
-
+	RENDER_MODE = 2;
 	RenderModel("floor", shader);
+
+	return;
+
+
+	WireframeShader testShader;
+	ModelTrans_ = Matrix::identity();
+	ModelTrans_.set_col(3, embed<4>(Vec3f(0.0, 0, 0)));
+	testShader.uniform_M = Projection * ModelView;
+	testShader.uniform_MIT = (Projection * ModelView).invert_transpose();
+
+	RenderModel("test_tri1", testShader);
 
 
 	ModelTrans_ = Matrix::identity();
@@ -654,7 +683,7 @@ void render() {
 	shaderHead_test.uniform_M = Projection * ModelView;
 	shaderHead_test.uniform_MIT = (Projection * ModelView).invert_transpose();
 
-	render_list = { "african_head","african_head_eye_inner"};
+	render_list = { "african_head","african_head_eye_inner" };
 	for (auto name : render_list) {
 		RenderModel(name, shaderHead_test);
 	}
