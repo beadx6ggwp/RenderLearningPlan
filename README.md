@@ -2,6 +2,11 @@
 
 https://beadx6ggwp.github.io/
 
+## Demo
+![image](https://user-images.githubusercontent.com/21116850/144461431-66cbedf1-20eb-40e6-9f5b-8df63971b786.png)
+
+https://github.com/beadx6ggwp/RenderLearningPlan/releases/tag/v0.1
+
 ## 主線 :
 
 GAMES101: 现代计算机图形学入门-闫令琪:屬於理論課程，從投影轉換到紋理貼圖，再到光線追蹤與進階研究
