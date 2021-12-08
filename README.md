@@ -159,7 +159,8 @@ gcc source code:https://github.com/gcc-mirror/gcc
 
 07/03 wireframe render
 
-https://davidhsu666.com/archives/wireframe-display/
+筆記文章:
+[Shader重心座標的線框繪製](https://davidhsu666.com/archives/wireframe-display/)
 ![](https://i.imgur.com/sw5v2YO.png)
 
 11/5  Fixed Camera & Perspective
