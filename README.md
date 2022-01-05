@@ -5,7 +5,7 @@ https://beadx6ggwp.github.io/
 ## Demo
 ![image](https://user-images.githubusercontent.com/21116850/144461431-66cbedf1-20eb-40e6-9f5b-8df63971b786.png)
 
-Source Code為myMiniRender_tinirender目錄中的檔案
+原始碼為code/myMiniRender_tinirender目錄中的檔案
 
 展示影片 : [Youtebe](https://www.youtube.com/watch?v=jN1e8iJbCS4)
 
