@@ -9,7 +9,7 @@ https://beadx6ggwp.github.io/
 
 展示影片 : [Youtebe](https://www.youtube.com/watch?v=jN1e8iJbCS4)
 
-介紹簡報 : [PPT](https://docs.google.com/presentation/d/1sqak1yTqsF3rqDLVOaG-x06u1fy9KEyR/edit?usp=sharing&ouid=101940096199231224973&rtpof=true&sd=true)(建議下載後投影片放映)
+簡報介紹 : [PPT](https://docs.google.com/presentation/d/1sqak1yTqsF3rqDLVOaG-x06u1fy9KEyR/edit?usp=sharing&ouid=101940096199231224973&rtpof=true&sd=true) (建議下載後投影片放映)
 
 
 ## 主線 :
