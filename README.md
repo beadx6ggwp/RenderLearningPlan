@@ -181,6 +181,9 @@ Perspective Correct Interpolation and Vertex Attributes
 ![](https://i.imgur.com/C9iTAhd.gif)
 
 
+![unknown](https://user-images.githubusercontent.com/21116850/148168311-59a8fd2d-e5f7-4d47-a7de-e7b6366527c3.png)
+
+
 ## 原理
 
 ![Imgur](https://i.imgur.com/r53RDTZ.png)
