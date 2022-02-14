@@ -23,7 +23,6 @@ void render();
 const int width = 600, height = 600, depth = 255;
 Device device;
 //--------------------------------------------------------
-//UI32 texture[256][256];
 
 void testCase();
 
@@ -42,7 +41,7 @@ int main(void) {
 		gameMain();
 
 		screen_update();// show framebuffer to screen
-		//Sleep(1);// if running too fast
+		//Sleep(1);// 1~n ms, if running too fast
 	}
 	return 0;
 }
@@ -92,7 +91,8 @@ void render() {
 
 	// move 1 pixel
 	testx = (testx + 1) % device.width;
-	device.setPixel(testx, 10, 0x000000);
+	for (int i = 0; i < 10; i++)
+		device.setPixel(testx - i, 10, 0x000000);
 
 	// draw cross, color format: 0xRRGGBB
 	device.drawLine(400, 100, 500, 200, 0xff0000);// red

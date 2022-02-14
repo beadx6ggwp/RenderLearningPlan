@@ -1,0 +1,27 @@
+"justCreateWindow" 
+點擊exe即可執行，或是vscode編譯，配合這篇文章使用，大致了解視窗建立與事件機制
+https://davidhsu666.com/archives/win32note01/
+
+基本的GDI字體(winapi內建繪製庫)與鍵盤事件，程式執行後在白色視窗按按鍵，cmd會顯示系統傳來的eventMsg，編碼為該鍵的ascii code
+
+---------------------------------
+
+"myMiniRender_ver0.13_noShader" 此版本移除shader，單純繪製用基礎框架，後續渲染都是基於此框架運作
+
+用vs2019點 .vcxproj 開啟，直接F5編譯執行，可以的話記得把上面Debug改成Release優化
+
+修改main.cpp的render()內容來繪製
+
+顏色格式是0xRRGGBB，0xff0000紅色、0x00ff00綠色、0x0000ff藍色等
+
+預設的繪製內容:
+> 10個點在上面跑
+> 一個叉叉
+> 一個有邊框的三角形
+> testCase() 可執行一些測試功能
+> update()處有基本的鍵盤事件
+
+其餘功能可看vs檔案目錄中的Source Files，任何一個功能不了解都能按F12看原理實作
+
+
+先做一個移動+自轉的正方形來感覺一下之類的，就可直接銜接games101
