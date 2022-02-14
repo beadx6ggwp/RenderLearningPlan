@@ -89,12 +89,12 @@ void render() {
 	device.clear();
 
 	// draw cross, color format: 0xRRGGBB
-	device.drawLine(400, 100, 500, 200, 0xff0000);
-	device.drawLine(500, 100, 400, 200, 0x0000ff);
+	device.drawLine(400, 100, 500, 200, 0xff0000);// red
+	device.drawLine(500, 100, 400, 200, 0x0000ff);// blue
 
-	// draw tri with Outer frame
+	// draw wire frame
 	device.fillTriangle2(Vec3f(300, 100, 0), Vec3f(250, 200, 0), Vec3f(350, 190, 0), 0xff7700);
-	device.drawTriangle(Vec3f(300, 100, 0), Vec3f(250, 200, 0), Vec3f(350, 190, 0), 0);
+	device.drawTriangle(Vec3f(300, 100, 0), Vec3f(250, 200, 0), Vec3f(350, 190, 0), 0x000000);
 
 	// show test case
 	//testCase();
