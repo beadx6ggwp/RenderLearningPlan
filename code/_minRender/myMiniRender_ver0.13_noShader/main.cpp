@@ -20,7 +20,7 @@ void gameMain();
 void update(float deltatime);
 void render();
 //-----------------------------------------
-const int width = 800, height = 800, depth = 255;
+const int width = 600, height = 600, depth = 255;
 Device device;
 //--------------------------------------------------------
 //UI32 texture[256][256];
@@ -42,7 +42,7 @@ int main(void) {
 		gameMain();
 
 		screen_update();// show framebuffer to screen
-		//Sleep(1);
+		//Sleep(1);// if running too fast
 	}
 	return 0;
 }
@@ -74,7 +74,6 @@ void gameMain() {
 }
 
 void update(float deltatime) {
-	// deltatime: https://gafferongames.com/post/integration_basics/
 	//cout << deltatime << "\n";
 
 	if (screen_keys[VK_UP]) {
@@ -84,20 +83,24 @@ void update(float deltatime) {
 		std::cout << "press w\n";
 	}
 }
-
+int testx = 100;
 void render() {
 	device.clear();
+
+	// show test case
+	//testCase();
+
+	// move 1 pixel
+	testx = (testx + 1) % device.width;
+	device.setPixel(testx, 10, 0x000000);
 
 	// draw cross, color format: 0xRRGGBB
 	device.drawLine(400, 100, 500, 200, 0xff0000);// red
 	device.drawLine(500, 100, 400, 200, 0x0000ff);// blue
 
-	// draw wire frame
+	// draw triangle & wire frame
 	device.fillTriangle2(Vec3f(300, 100, 0), Vec3f(250, 200, 0), Vec3f(350, 190, 0), 0xff7700);
 	device.drawTriangle(Vec3f(300, 100, 0), Vec3f(250, 200, 0), Vec3f(350, 190, 0), 0x000000);
-
-	// show test case
-	//testCase();
 }
 
 void testCase() {
