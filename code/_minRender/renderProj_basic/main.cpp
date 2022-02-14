@@ -34,7 +34,7 @@ void onLoad() {
 int sx = 10, sy = 10;
 void gameMain() {
 
-	//printf("%s\n", "is running");
+	printf("%s\n", "is running");
 	device_clear(&device, 0);
 
 	device_draw_line(&device, sx, sy, sx + 300, sy + 300, 0x000000);
