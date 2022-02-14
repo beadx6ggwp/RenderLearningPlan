@@ -20,6 +20,16 @@ LRESULT CALLBACK myEvent(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
             std::cout << "WM_KEYUP:\t" << wParam << "\n";
             break;
         }
+        case WM_PAINT: {
+            PAINTSTRUCT ps;
+            RECT rect;
+            HDC hdc = BeginPaint(hwnd, &ps);
+            GetClientRect(hwnd, &rect);
+            DrawText(hdc, TEXT("Hello, Windows!"), (int)-1, &rect,
+                     DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+            EndPaint(hwnd, &ps);
+            break;
+        }
         case WM_DESTROY: {
             PostQuitMessage(0);
             return 0;
@@ -35,6 +45,7 @@ int main() {
 
     std::cout << "WindowsApp\n";
 
+    // 綁定此window的資訊，並向系統註冊此程式
     LPCWSTR cls_Name = L"TestWindow";
     WNDCLASS wc = {};
     wc.lpfnWndProc = myEvent;
@@ -42,17 +53,19 @@ int main() {
     wc.lpszClassName = cls_Name;
     if (!RegisterClass(&wc)) return -1;
 
+    // 建立window執行的物件
     HWND hwnd = CreateWindow(cls_Name, L"HelloWorld", WS_OVERLAPPEDWINDOW, 0, 0,
                              400, 400, NULL, NULL, wc.hInstance, NULL);
 
     if (hwnd == NULL) return 0;  //判斷是否成功Create
 
-    // 顯示視窗
+    // 顯示此window物件
     ShowWindow(hwnd, SW_SHOW);
 
-    // 事件訊息loop
+    // 訊息循環，持續監聽
     MSG msg;
     while (GetMessage(&msg, NULL, 0, 0)) {
+        // do something
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
