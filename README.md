@@ -14,7 +14,7 @@ https://beadx6ggwp.github.io/
 ## 當前情況 :
 專題報告時的版本為releases的Demo ver0.1，對應為"code\13 myMiniRender_Fixed persp&camera"
 
-而code\myMiniRender_tinirender固定為目前修改版
+而code\myMiniRender_tinirender為最新修改版，有什麼改動都在這，覺得OK後才會給編號
 
 感覺應該要弄git的分支管理，之後再處理
 
