@@ -5,12 +5,18 @@ https://beadx6ggwp.github.io/
 ## Demo
 ![image](https://user-images.githubusercontent.com/21116850/144461431-66cbedf1-20eb-40e6-9f5b-8df63971b786.png)
 
-原始碼為code/myMiniRender_tinirender目錄中的檔案
+原始碼為[Releases](https://github.com/beadx6ggwp/RenderLearningPlan/releases)目錄中的檔案
 
 展示影片 : [Youtebe](https://www.youtube.com/watch?v=jN1e8iJbCS4)
 
 簡報介紹 : [PPT](https://docs.google.com/presentation/d/1sqak1yTqsF3rqDLVOaG-x06u1fy9KEyR/edit?usp=sharing&ouid=101940096199231224973&rtpof=true&sd=true) (建議下載後投影片放映)
 
+## 當前情況 :
+專題報告時的版本為releases的Demo ver0.1，對應為"code\13 myMiniRender_Fixed persp&camera"
+
+而code\myMiniRender_tinirender固定為目前修改版
+
+感覺應該要弄git的分支管理，之後再處理
 
 ## 主線 :
 
