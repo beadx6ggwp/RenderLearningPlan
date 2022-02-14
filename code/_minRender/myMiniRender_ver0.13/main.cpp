@@ -23,10 +23,9 @@ void render();
 const int width = 800, height = 800, depth = 255;
 Device device;
 //--------------------------------------------------------
-UI32 texture[256][256];
+//UI32 texture[256][256];
 
 void testCase();
-void filltriangle_bery_texture(Vec3f* pts, Vec3f* vt);
 
 int main(void) {
 	const TCHAR* title = _T("Win32");
@@ -54,12 +53,12 @@ void onLoad() {
 	testmat.set_col(0, embed<4>(Vec3f(1, 2, 3), 5.0f));
 	std::cout << testmat;
 
-	// 生成藍白方格的texture
+	// create blue/white texture
 	int i, j;
 	for (j = 0; j < 256; j++) {
 		for (i = 0; i < 256; i++) {
 			int x = i / 32, y = j / 32;
-			texture[j][i] = ((x + y) & 1) ? 0xffffff : 0x3fbcef;
+			device.bery_texture[j][i] = ((x + y) & 1) ? 0xffffff : 0x3fbcef;
 		}
 	}
 }
@@ -69,6 +68,7 @@ void gameMain() {
 			 L"Render ver0.1, %dx%d, FPS:%4d, dt:%2dms",
 			 device.width, device.height, fps, deltaT);
 	SetWindowText(screen_handle, strBuffer); // change title bar
+
 	update(deltaT / 1000.0f);
 	render();
 }
@@ -96,9 +96,8 @@ void render() {
 	device.fillTriangle2(Vec3f(300, 100, 0), Vec3f(250, 200, 0), Vec3f(350, 190, 0), 0xff7700);
 	device.drawTriangle(Vec3f(300, 100, 0), Vec3f(250, 200, 0), Vec3f(350, 190, 0), 0);
 
-	// ------
+	// show test case
 	//testCase();
-	// ------
 }
 
 void testCase() {
@@ -130,52 +129,15 @@ void testCase() {
 	Vec3f tri3[] = { a, Vec3f(a.x + 200,a.y,a.z), Vec3f(a.x + 100,a.y + 150,a.z) };
 	device.filltriangle_bery_testRGB(tri3, cols3);
 
-	//--------------------------------------------------------------------------------------------------
-
+	//texture test
 	Vec3f p1(300, 300, 0), size(200, 200, 0);
 	Vec3f vt1[] = { Vec3f(0, 0, 0), Vec3f(1, 0, 0), Vec3f(0, 1, 0) };
 	Vec3f triT1[] = { p1, Vec3f(p1.x + size.x,p1.y,0), Vec3f(p1.x,p1.y + size.y,0) };
-	filltriangle_bery_texture(triT1, vt1);
+	device.filltriangle_bery_texture(triT1, vt1);
 
-	p1.x += 2; p1.y += 2;
+	p1.x += 3; p1.y += 3;
 	Vec3f vt2[] = { Vec3f(1, 0, 0), Vec3f(1, 1, 0), Vec3f(0, 1, 0) };
 	Vec3f triT2[] = { Vec3f(p1.x + size.x,p1.y,0), Vec3f(p1.x + size.x,p1.y + size.y,0), Vec3f(p1.x,p1.y + size.y,0) };
-	filltriangle_bery_texture(triT2, vt2);
+	device.filltriangle_bery_texture(triT2, vt2);
 }
 
-void filltriangle_bery_texture(Vec3f* pts, Vec3f* vt) {
-	Vec2f bboxmin((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
-	Vec2f bboxmax(-(std::numeric_limits<float>::max)(), -(std::numeric_limits<float>::max)());
-	Vec2f clamp(width - 1, height - 1);
-	for (int i = 0; i < 3; i++) {
-		for (int j = 0; j < 2; j++) {
-			bboxmin[j] = (std::max)(0.f, (std::min)(bboxmin[j], pts[i][j]));
-			bboxmax[j] = (std::min)(clamp[j], (std::max)(bboxmax[j], pts[i][j]));
-		}
-	}
-	Vec3f p, bc_screen;
-	for (p.x = bboxmin.x; p.x <= bboxmax.x; p.x++) {
-		for (p.y = bboxmin.y; p.y <= bboxmax.y; p.y++) {
-			bc_screen = barycentric(proj<2>(pts[0]), proj<2>(pts[1]), proj<2>(pts[2]), proj<2>(p));
-			// check point in tri
-			if (bc_screen.x < 0 || bc_screen.y < 0 || bc_screen.z < 0) continue;
-
-			p.z = 0;
-			for (int i = 0; i < 3; i++) p.z += pts[i][2] * bc_screen[i];
-			if (p.z > device.zbuffer[(int)p.y][(int)p.x]) {
-				device.zbuffer[(int)p.y][(int)p.x] = p.z;
-
-				Vec3f col(
-					bc_screen.x * vt[0].x + bc_screen.y * vt[1].x + bc_screen.z * vt[2].x,
-					bc_screen.x * vt[0].y + bc_screen.y * vt[1].y + bc_screen.z * vt[2].y,
-					bc_screen.x * vt[0].z + bc_screen.y * vt[1].z + bc_screen.z * vt[2].z
-				);
-				//diffuse底色/texture
-				int u = col.x * 255; // diffuseWidth 
-				int v = col.y * 255; // diffuseHeight
-				UI32 c = texture[v][u];
-				device.setPixel(p.x, p.y, c);
-			}
-		}
-	}
-}

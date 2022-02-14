@@ -40,6 +40,7 @@ public:
 	float max_v;                // 紋理最大高度：tex_height - 1
 	int render_state;           // 渲染狀態
 	UI32 background;            // 背景顏色
+	std::vector<std::vector<UI32>> bery_texture;
 
 	std::vector<float> zbuffer2;
 
@@ -55,6 +56,7 @@ public:
 
 		ptr += sizeof(void*) * height * 2;
 		texture = (UI32**)ptr;
+		bery_texture.resize(256, std::vector<UI32>(256, 0));
 		ptr += sizeof(void*) * 1024;
 		framebuf = (char*)ptr;
 		zbuf = (char*)ptr + width * height * 4;
@@ -157,4 +159,5 @@ public:
 	void filltriangle_bery(Vec3f* pts, UI32 c);
 	void filltriangle_bery_zbuffer(Vec3f* pts, UI32 c);
 	void filltriangle_bery_testRGB(Vec3f* pts, Vec3f colors[]);
+	void filltriangle_bery_texture(Vec3f* pts, Vec3f* vt);
 };

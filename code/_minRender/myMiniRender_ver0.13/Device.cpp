@@ -227,12 +227,49 @@ void Device::filltriangle_bery_testRGB(Vec3f* pts, Vec3f colors[]) {
 			if (p.z > zbuffer[(int)p.y][(int)p.x]) {
 				zbuffer[(int)p.y][(int)p.x] = p.z;
 
-				Vec3f col (
+				Vec3f col(
 					bc_screen.x * colors[0].x + bc_screen.y * colors[1].x + bc_screen.z * colors[2].x,
 					bc_screen.x * colors[0].y + bc_screen.y * colors[1].y + bc_screen.z * colors[2].y,
 					bc_screen.x * colors[0].z + bc_screen.y * colors[1].z + bc_screen.z * colors[2].z
 				);
 				UI32 c = (int)(col.x * 255) << 16 | (int)(col.y * 255) << 8 | (int)(col.z * 255);
+				setPixel(p.x, p.y, c);
+			}
+		}
+	}
+}
+
+void Device::filltriangle_bery_texture(Vec3f* pts, Vec3f* vt) {
+	Vec2f bboxmin((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
+	Vec2f bboxmax(-(std::numeric_limits<float>::max)(), -(std::numeric_limits<float>::max)());
+	Vec2f clamp(width - 1, height - 1);
+	for (int i = 0; i < 3; i++) {
+		for (int j = 0; j < 2; j++) {
+			bboxmin[j] = (std::max)(0.f, (std::min)(bboxmin[j], pts[i][j]));
+			bboxmax[j] = (std::min)(clamp[j], (std::max)(bboxmax[j], pts[i][j]));
+		}
+	}
+	Vec3f p, bc_screen;
+	for (p.x = bboxmin.x; p.x <= bboxmax.x; p.x++) {
+		for (p.y = bboxmin.y; p.y <= bboxmax.y; p.y++) {
+			bc_screen = barycentric(proj<2>(pts[0]), proj<2>(pts[1]), proj<2>(pts[2]), proj<2>(p));
+			// check point in tri
+			if (bc_screen.x < 0 || bc_screen.y < 0 || bc_screen.z < 0) continue;
+
+			p.z = 0;
+			for (int i = 0; i < 3; i++) p.z += pts[i][2] * bc_screen[i];
+			if (p.z > zbuffer[(int)p.y][(int)p.x]) {
+				zbuffer[(int)p.y][(int)p.x] = p.z;
+
+				Vec3f col(
+					bc_screen.x * vt[0].x + bc_screen.y * vt[1].x + bc_screen.z * vt[2].x,
+					bc_screen.x * vt[0].y + bc_screen.y * vt[1].y + bc_screen.z * vt[2].y,
+					bc_screen.x * vt[0].z + bc_screen.y * vt[1].z + bc_screen.z * vt[2].z
+				);
+				//diffuse底色/texture
+				int u = col.x * 255; // diffuseWidth 
+				int v = col.y * 255; // diffuseHeight
+				UI32 c = bery_texture[v][u];
 				setPixel(p.x, p.y, c);
 			}
 		}
