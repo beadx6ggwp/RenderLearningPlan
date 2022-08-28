@@ -265,6 +265,7 @@ SourceCode影片都有附上，https://github.com/beadcaptain/CodingMath 而這�
 [國中幾何](https://www.youtube.com/watch?v=XE8So0BH-hU&list=PLGLWAatm7Y2Vkyw_NR5dy642ok6_IG3tw&index=40)
 
 Q仔數學教室
+https://www.youtube.com/playlist?list=PL-QFPCjbXoYHtD13YJ4UPJWCE7p0JSS3v
 
 [高一上:](https://www.youtube.com/playlist?list=PL-QFPCjbXoYFBtMAWWp_WLMjJBWbcB55B)
 算幾不等式、乘法公式、斜率、多項式函數、餘式定理、因式定理、指數對數
