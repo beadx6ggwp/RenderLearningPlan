@@ -7,7 +7,7 @@
 int screen_w, screen_h, screen_exit = 0;
 int screen_mx = 0, screen_my = 0, screen_mb = 0;
 int screen_keys[512];
-static HWND screen_handle = NULL;		// 主窗口 HWND
+static HWND screen_handle = NULL;		// 主HWND
 static HDC screen_dc = NULL;			// 配套的 HDC
 static HBITMAP screen_hb = NULL;		// DIB
 static HBITMAP screen_ob = NULL;		// old_bitmap
@@ -27,10 +27,10 @@ static LRESULT screen_events(HWND, UINT, WPARAM, LPARAM);
 #pragma comment(lib, "user32.lib")
 #endif
 
-// 初始化窗口並設置標題
+// 初始化並設置標題
 int screen_init(int w, int h, const TCHAR* title) {
 	WNDCLASS wc = { CS_BYTEALIGNCLIENT, (WNDPROC)screen_events, 0, 0, 0,
-		NULL, NULL, NULL, NULL, _T("SCREEN3.1415926") };
+		NULL, NULL, NULL, NULL, _T("win32") };
 	BITMAPINFO bi = { { sizeof(BITMAPINFOHEADER), w, -h, 1, 32, BI_RGB,
 		w * h * 4, 0, 0, 0, 0 } };
 	RECT rect = { 0, 0, w, h };
@@ -45,7 +45,7 @@ int screen_init(int w, int h, const TCHAR* title) {
 	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
 	if (!RegisterClass(&wc)) return -1;
 
-	screen_handle = CreateWindow(_T("SCREEN3.1415926"), title,
+	screen_handle = CreateWindow(_T("win32"), title,
 								 WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
 								 0, 0, 0, 0, NULL, NULL, wc.hInstance, NULL);
 	if (screen_handle == NULL) return -2;
@@ -103,6 +103,7 @@ int screen_close(void) {
 	return 0;
 }
 
+// 處理攔截的win event
 static LRESULT screen_events(HWND hWnd, UINT msg,
 							 WPARAM wParam, LPARAM lParam) {
 	switch (msg) {

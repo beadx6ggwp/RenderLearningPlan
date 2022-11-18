@@ -28,18 +28,18 @@ typedef unsigned int UI32;
 class Device
 {
 public:
-	int width;                  // 寬度
-	int height;                 // 高度
+	int width;                  
+	int height;                 
 	UI32** framebuffer;			// pixelbuffer：framebuffer[y] 代表第 y行
-	float** zbuffer;            // 深度緩衝：zbuffer[y] 為第 y行指針
+	float** zbuffer;            // 深度緩衝：zbuffer[y][x]
 	float zbufferMax;
-	UI32** texture;             // 紋理：同樣是每行索引
+	UI32** texture;             // 紋理：texture[y][x]
 	int tex_width;              // 紋理寬度
 	int tex_height;             // 紋理高度
 	float max_u;                // 紋理最大寬度：tex_width - 1
 	float max_v;                // 紋理最大高度：tex_height - 1
-	int render_state;           // 渲染狀態
-	UI32 background;            // 背景顏色
+	int render_state;           
+	UI32 background;            
 	std::vector<std::vector<UI32>> bery_texture;
 
 	std::vector<float> zbuffer2;
