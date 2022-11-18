@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Source Files\Screen">
+      <UniqueIdentifier>{695fb4e0-efbe-4bd4-9f4b-38720ec58cdd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\RenderDevice">
+      <UniqueIdentifier>{eff44051-3a4a-4155-855d-526de2630626}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Math">
+      <UniqueIdentifier>{4e78f691-c749-4414-9feb-fe72b29af8fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Tool">
+      <UniqueIdentifier>{b9177cec-dea4-4870-aa99-9ddbe2a139ac}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Device.cpp">
+      <Filter>Source Files\RenderDevice</Filter>
+    </ClCompile>
+    <ClCompile Include="Geometry.cpp">
+      <Filter>Source Files\Math</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Device.h">
+      <Filter>Source Files\RenderDevice</Filter>
+    </ClInclude>
+    <ClInclude Include="Screen.h">
+      <Filter>Source Files\Screen</Filter>
+    </ClInclude>
+    <ClInclude Include="Geometry.h">
+      <Filter>Source Files\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Tool.h">
+      <Filter>Source Files\Tool</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
