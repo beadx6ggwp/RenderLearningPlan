@@ -46,7 +46,7 @@ void onLoad() {
 	std::cout << "Start\n";
 
 	player = Vec2f(10, 20);
-	speed = Vec2f(400, 200);
+	speed = Vec2f(400, 100);
 }
 void gameMain() {
 	fpsCounting();
@@ -72,8 +72,8 @@ void update(float dt) {
 	player.x += speed.x * dt;
 	player.y += speed.y * dt;
 
-	if (player.x > width || player.x < 0)speed.x *= -1;
-	if (player.y > width || player.y < 0)speed.y *= -1;
+	if ((player.x > width && speed.x > 0) || (player.x < 0 && speed.x < 0))speed.x *= -1;
+	if ((player.y > width && speed.y > 0) || (player.y < 0 && speed.y < 0))speed.y *= -1;
 }
 
 int testx = 100;
@@ -99,4 +99,10 @@ void render() {
 	// draw triangle & wire frame
 	device.fillTriangle2(Vec3f(300, 100, 0), Vec3f(250, 200, 0), Vec3f(350, 190, 0), 0xff7700);
 	device.drawTriangle(Vec3f(300, 100, 0), Vec3f(250, 200, 0), Vec3f(350, 190, 0), 0x000000);
+
+
+	//fill rect
+	int x1 = 50, y1 = 50, rw = 50, rh = 50;
+	device.fillTriangle2(Vec3f(x1, y1, 0), Vec3f(x1 + rw, y1, 0), Vec3f(x1, y1 + rh, 0), 0x0077ff);
+	device.fillTriangle2(Vec3f(x1 + rw, y1, 0), Vec3f(x1, y1 + rh, 0), Vec3f(x1 + rw, y1 + rh, 0), 0x0077ff);
 }
