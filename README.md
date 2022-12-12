@@ -137,6 +137,8 @@ gcc source code:https://github.com/gcc-mirror/gcc
 
 2020/10/15:
 
+[Software Rasterization Algorithms for Filling Triangles](http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html)
+
 ![ezgif-4-066520f665a6](https://user-images.githubusercontent.com/21116850/96186551-2c5c5580-0f6e-11eb-899c-3d7ffea7595d.gif)
 
 11/24:
