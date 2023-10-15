@@ -108,7 +108,7 @@ gcc source code:https://github.com/gcc-mirror/gcc
 - how OpenGL works: software rendering:[Github](https://github.com/ssloy/tinyrenderer)
 - 帽捲-電腦圖學01-Transformation:[Article](https://medium.com/maochinn/%E9%9B%BB%E8%85%A6%E5%9C%96%E5%AD%B801-transformation-%E6%96%BD%E5%B7%A5%E4%B8%AD-ea46dedf01f9)
 - Computer Graphics from scratch:[Article](https://gabrielgambetta.com/computer-graphics-from-scratch/table-of-contents.html)
-- ScratchaPixel : https://www.scratchapixel.com/index.php
+- ScratchaPixel : https://www.scratchapixel.com
 - 二圈妹圖形學筆記:[知乎](https://www.zhihu.com/column/cgnotes)
 
 實作:
