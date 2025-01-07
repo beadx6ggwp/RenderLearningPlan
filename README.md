@@ -211,15 +211,11 @@ C++用VisualStudio2019、VScode+GCC+CM
 
 ## 其他
 
-先不整理，單純先丟出跟我們方向相關的資源
-
-應該會重點圍繞在這本書上，我這有簡中版，Tricks of the 3D Game Programming Gurus - Advanced 3D Graphics and Rasterization
+應該會重點圍繞在這本書上，Tricks of the 3D Game Programming Gurus - Advanced 3D Graphics and Rasterization
 
 有些內容過時了，可能要慢慢研究替待方法
 
 Practical Rendering and Computation with Direct3D 11
-
-PDF電子書 [Google Drive](https://drive.google.com/drive/folders/1YCooGN86mw_TNKmTB8LpJHbhuswdmCQk?usp=sharing)
 
 https://github.com/skywind3000/mini3d
 
